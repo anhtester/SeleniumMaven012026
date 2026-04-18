@@ -36,6 +36,10 @@
     - `LocatorsHTML.java`
     - `LocatorsXPath_01_05.java`
     - `LocatorsXPath_06_10.java`
+  - `Bai6_WebElement/`: Bài học về WebElement
+    - `DemoWebElement01.java`
+    - `DemoWebElement02.java`
+    - `DemoWebElement03.java`
 - `pom.xml`: File cấu hình Maven
 - `target/`: Thư mục chứa các file compiled
 
@@ -53,10 +57,17 @@
 
 ## Bài học
 Dự án này bao gồm các bài học về:
-- Cài đặt và cấu hình Selenium WebDriver
-- Tương tác với các element trên trang web
-- Sử dụng Locators (HTML, XPath)
-- Viết test case tự động
+- **Cài đặt và cấu hình Selenium WebDriver**
+- **Bai5 - Locators**: Sử dụng HTML Locators và XPath để tìm kiếm các phần tử trên trang web
+  - HTML Locators cơ bản
+  - XPath cấp 1-5 và cấp 6-10
+- **Bai6 - WebElement**: Tương tác với các element trên trang web
+  - Lấy thông tin CSS (getCssValue)
+  - Lấy kích thước và vị trí element (getSize, getLocation)
+  - Lấy giá trị thuộc tính (getAttribute)
+  - Tương tác với form (submit, sendKeys, click)
+  - Xử lý bảng dữ liệu (table)
+- **Viết test case tự động**
 
 ## Giấy phép
 Dự án này được phân phối dưới giấy phép MIT. Xem file [LICENSE](LICENSE) để biết thêm chi tiết.
