@@ -40,6 +40,12 @@
     - `DemoWebElement01.java`
     - `DemoWebElement02.java`
     - `DemoWebElement03.java`
+  - `Bai7_WebDriver/`: Bài học về WebDriver
+    - `DemoBasicBrowser.java`: Các thao tác cơ bản với trình duyệt (navigate, getTitle, getCurrentUrl, getPageSource)
+    - `DemoAdvancedBrowser.java`: Quản lý cửa sổ và tab (newWindow, switchTo, close)
+    - `DemoCookiesBrowser.java`: Thêm cookie thủ công
+    - `DemoCookiesBrowser_Auto.java`: Quản lý cookies tự động (getCookies, deleteCookies)
+    - `ListWebElement_FindElements.java`: Sử dụng findElements để lấy danh sách elements
 - `pom.xml`: File cấu hình Maven
 - `target/`: Thư mục chứa các file compiled
 
@@ -67,7 +73,11 @@ Dự án này bao gồm các bài học về:
   - Lấy giá trị thuộc tính (getAttribute)
   - Tương tác với form (submit, sendKeys, click)
   - Xử lý bảng dữ liệu (table)
-- **Viết test case tự động**
+- **Bai7 - WebDriver**: Làm quen với các khái niệm và thao tác cơ bản trong Selenium WebDriver
+  - Các thao tác cơ bản với trình duyệt: navigate (to, back, forward, refresh), getTitle, getCurrentUrl, getPageSource
+  - Quản lý cửa sổ và tab trình duyệt: newWindow, switchTo, close, quit
+  - Làm việc với cookies: addCookie, getCookies, deleteCookies
+  - Sử dụng findElements để lấy danh sách WebElement và duyệt qua chúng
 
 ## Giấy phép
 Dự án này được phân phối dưới giấy phép MIT. Xem file [LICENSE](LICENSE) để biết thêm chi tiết.
