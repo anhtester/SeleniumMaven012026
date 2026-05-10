@@ -21,6 +21,48 @@
          <artifactId>selenium-java</artifactId>
          <version>4.43.0</version>
       </dependency>
+
+      <!-- Source: https://mvnrepository.com/artifact/org.testng/testng -->
+      <dependency>
+         <groupId>org.testng</groupId>
+         <artifactId>testng</artifactId>
+         <version>7.12.0</version>
+      </dependency>
+
+      <!-- Source: https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>slf4j-api</artifactId>
+         <version>2.0.17</version>
+         <scope>compile</scope>
+      </dependency>
+
+      <!-- Source: https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>slf4j-simple</artifactId>
+         <version>2.0.17</version>
+      </dependency>
    </dependencies>
+
+   <build>
+      <plugins>
+
+         <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.5.5</version>
+
+            <configuration>
+               <suiteXmlFiles>
+                  <suiteXmlFile>src/test/resources/suites/SuiteLoginTest.xml</suiteXmlFile>
+                  <suiteXmlFile>src/test/resources/suites/SuiteCustomerTest.xml</suiteXmlFile>
+               </suiteXmlFiles>
+            </configuration>
+
+         </plugin>
+
+      </plugins>
+   </build>
 
 </project>
