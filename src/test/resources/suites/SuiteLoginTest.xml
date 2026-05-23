@@ -1,7 +1,13 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="Regression Test" verbose="1">
-   <test name="Login Test">
+   <test name="Login Test with Chrome">
+      <classes>
+         <class name="com.anhtester.Bai9_TestNG.SeleniumTestNG" />
+      </classes>
+   </test>
+
+   <test name="Login Test with Firefox">
       <classes>
          <class name="com.anhtester.Bai9_TestNG.SeleniumTestNG" />
       </classes>

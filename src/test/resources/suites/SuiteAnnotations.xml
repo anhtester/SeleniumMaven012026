@@ -1,0 +1,17 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Suite Annotations" verbose="1">
+   <test name="Login Test with Chrome">
+      <classes>
+         <class name="com.anhtester.Bai10_Annotations.DemoAnnotations_1" />
+<!--         <class name="com.anhtester.Bai10_Annotations.DemoAnnotations_2" />-->
+      </classes>
+   </test>
+
+<!--   <test name="Login Test with Firefox">-->
+<!--      <classes>-->
+<!--         <class name="com.anhtester.Bai10_Annotations.DemoAnnotations_1" />-->
+<!--&lt;!&ndash;         <class name="com.anhtester.Bai10_Annotations.DemoAnnotations_2" />&ndash;&gt;-->
+<!--      </classes>-->
+<!--   </test>-->
+</suite>
