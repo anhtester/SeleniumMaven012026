@@ -17,6 +17,8 @@
   - [Bài 7 — WebDriver](#bài-7--webdriver)
   - [Bài 8 — Checkbox, Radio, Dropdown](#bài-8--checkbox-radio-dropdown)
   - [Bài 9 — TestNG Framework](#bài-9--testng-framework)
+  - [Bài 10 — Annotations](#bài-10--annotations)
+  - [Bài 11 — Assertions (Hard & Soft Assert)](#bài-11--assertions-hard--soft-assert)
 - [Cách chạy test](#-cách-chạy-test)
 - [Giấy phép](#-giấy-phép)
 
@@ -109,9 +111,25 @@ SeleniumMaven012026/
 │       │   │   ├── HandleDropdownStatic.java
 │       │   │   └── HandleDropdownDynamic.java
 │       │   │
-│       │   └── Bai9_TestNG/                 # 📌 Bài 9: TestNG Framework
-│       │       ├── DemoTestNG.java
-│       │       └── SeleniumTestNG.java
+│       │   ├── Bai9_TestNG/                 # 📌 Bài 9: TestNG Framework
+│       │   │   ├── DemoTestNG.java
+│       │   │   └── SeleniumTestNG.java
+│       │   │
+│       │   ├── Bai10_Annotations/           # 📌 Bài 10: Annotations
+│       │   │   ├── DemoAnnotations_1.java
+│       │   │   ├── DemoAnnotations_2.java
+│       │   │   ├── DemoTest.java
+│       │   │   ├── ParentTestClass.java
+│       │   │   └── DemoAutomation/
+│       │   │       ├── BaseTest.java
+│       │   │       ├── CustomerTest.java
+│       │   │       ├── LoginTest.java
+│       │   │       ├── LoginTest2.java
+│       │   │       └── LoginTest3.java
+│       │   │
+│       │   └── Bai11_Assert/                # 📌 Bài 11: Assertions
+│       │       ├── DemoHardAssert.java
+│       │       └── DemoSoftAssert.java
 │       │
 │       └── resources/suites/                # TestNG Suite XML
 │           ├── SuiteLoginTest.xml
@@ -240,6 +258,58 @@ SeleniumMaven012026/
 - **Tích hợp Maven:**
   - Plugin `maven-surefire-plugin` chạy suite XML qua lệnh `mvn test`
   - Cấu hình nhiều `suiteXmlFile` trong `pom.xml`
+
+---
+
+### Bài 10 — Annotations
+
+> Tìm hiểu sâu về các Annotation trong TestNG để quản lý luồng chạy kiểm thử chuyên nghiệp.
+
+| File | Nội dung |
+| :--- | :--- |
+| `DemoAnnotations_1.java` | Demo thứ tự chạy của 10 Annotation cơ bản của TestNG khi kết hợp kế thừa. |
+| `DemoAnnotations_2.java` | Demo thứ tự chạy và cách hoạt động của các Annotation cơ bản độc lập. |
+| `ParentTestClass.java` | Class cha định nghĩa các annotation `@Before` và `@After` để lớp con kế thừa. |
+| `DemoTest.java` | Trình bày các tham số của `@Test` như: `priority`, `description`, `enabled`, `timeOut`, `dependsOnMethods`, `alwaysRun`. |
+| **DemoAutomation/** | **Thư mục chứa ví dụ tích hợp Selenium WebDriver thực tế:** |
+| ├─ `BaseTest.java` | Cấu hình Driver dùng chung: Setup và TearDown trình duyệt tự động trước/sau mỗi test method. |
+| ├─ `LoginTest.java` | Test case Login tự quản lý Driver bằng `@BeforeClass` và `@AfterClass`. |
+| ├─ `LoginTest2.java` | Test case Login kế thừa `BaseTest` (mỗi test case chạy trên trình duyệt mới). |
+| ├─ `LoginTest3.java` | Test case Login tối ưu hóa code và thừa kế thiết lập từ `BaseTest`. |
+| └─ `CustomerTest.java` | Demo chạy test case thêm/quản lý Customer. |
+
+**Kiến thức chính:**
+- Thứ tự thực thi của các annotations TestNG:
+  `Suite` ➔ `Test` ➔ `Class` ➔ `Group` ➔ `Method` ➔ `Test Case`
+- Kế thừa annotations từ Class cha (`ParentTestClass`, `BaseTest`).
+- Sử dụng tham số nâng cao trong `@Test`:
+  - `priority`: Xác định thứ tự chạy các test cases.
+  - `description`: Mô tả ngắn gọn về test case.
+  - `enabled`: Bật/Tắt test case (`true`/`false`).
+  - `timeOut`: Thời gian chạy tối đa cho phép của test case (milliseconds).
+  - `dependsOnMethods`: Ràng buộc phụ thuộc giữa các test cases.
+  - `alwaysRun = true`: Đảm bảo test case luôn chạy dù các test case phụ thuộc có fail.
+
+---
+
+### Bài 11 — Assertions (Hard & Soft Assert)
+
+> Sử dụng các câu lệnh kiểm thử (Assertions) để xác minh kết quả mong đợi.
+
+| File | Nội dung |
+| :--- | :--- |
+| `DemoHardAssert.java` | Sử dụng Hard Assert (`Assert`) của TestNG, dừng luồng chạy ngay lập tức khi phát hiện lỗi verify. |
+| `DemoSoftAssert.java` | Sử dụng Soft Assert (`SoftAssert`) của TestNG, ghi nhận lỗi và tiếp tục chạy các bước tiếp theo, tổng hợp lỗi ở cuối qua `softAssert.assertAll()`. |
+
+**Kiến thức chính:**
+- **Hard Assert (`org.testng.Assert`):**
+  - Các hàm phổ biến: `assertEquals()`, `assertTrue()`, `assertFalse()`, `assertNull()`, `assertNotNull()`, `fail()`.
+  - Phù hợp cho kiểm tra điều kiện tiên quyết (Preconditions) như Login thành công, URL chính xác trước khi thực hiện các bước tiếp theo.
+- **Soft Assert (`org.testng.asserts.SoftAssert`):**
+  - Cần khởi tạo đối tượng `SoftAssert` trước khi sử dụng.
+  - Các lỗi verify không làm dừng test case ngay lập tức mà được gom lại.
+  - **Bắt buộc** gọi `assertAll()` ở cuối test case hoặc trong `@AfterMethod` / `@AfterClass` để tổng hợp và đánh dấu test case Fail/Pass.
+- Sử dụng Try-Catch kết hợp với `Assert.fail()` để bắt lỗi khi không tìm thấy Element hoặc xảy ra Exception và đưa ra thông báo rõ ràng.
 
 ---
 
