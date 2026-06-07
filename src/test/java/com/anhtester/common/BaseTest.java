@@ -11,7 +11,7 @@ public class BaseTest {
    public WebDriver driver;
 
    @BeforeMethod
-   public void createDriver(){
+   public void createDriver() {
       driver = new ChromeDriver();
 
       driver.manage().window().maximize();
@@ -20,7 +20,15 @@ public class BaseTest {
    }
 
    @AfterMethod
-   public void closeDriver(){
+   public void closeDriver() {
       driver.quit();
+   }
+
+   public void sleep(double seconds) {
+      try {
+         Thread.sleep((long) (seconds * 1000));
+      } catch (InterruptedException e) {
+         e.printStackTrace();
+      }
    }
 }
