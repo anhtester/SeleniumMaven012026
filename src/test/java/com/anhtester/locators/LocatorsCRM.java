@@ -11,6 +11,4 @@ public class LocatorsCRM {
     public static By alertEmailRequiredMessage = By.xpath("//div[normalize-space()='The Email Address field is required.']");
     public static By alertPasswordRequiredMessage = By.xpath("//div[normalize-space()='The Password field is required.']");
 
-
-
 }

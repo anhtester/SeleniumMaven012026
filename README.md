@@ -24,6 +24,7 @@
   - [Bài 14 — JavascriptExecutor](#bài-14--javascriptexecutor)
   - [Bài 15 — Waits (Implicit & Explicit)](#bài-15--waits-implicit--explicit)
   - [Bài 16 — Thực hành tổng hợp (CRM)](#bài-16--thực-hành-tổng-hợp-crm)
+  - [Bài 17 — Page Object Model (POM)](#bài-17--page-object-model-pom)
 - [Cách chạy test](#-cách-chạy-test)
 - [Giấy phép](#-giấy-phép)
 
@@ -87,6 +88,8 @@ SeleniumMaven012026/
 ├── src/
 │   ├── main/java/com/anhtester/
 │   │   ├── Main.java               # Entry point (demo)
+│   │   ├── constants/
+│   │   │   └── ConfigData.java     # Hằng số cấu hình dùng chung (URL...)
 │   │   ├── keywords/
 │   │   │   └── WebUI.java          # Lớp keyword dùng chung (setText, clickElement, isElementPresent...)
 │   │   └── utils/
@@ -164,9 +167,19 @@ SeleniumMaven012026/
 │       │   │   ├── DemoImplicitWait.java
 │       │   │   └── DemoExplicitWait.java
 │       │   │
-│       │   └── Bai16_ThucHanh/              # 📌 Bài 16: Thực hành tổng hợp (CRM)
-│       │       ├── ThucHanhLoginCRM.java
-│       │       └── ThucHanhCustomerCRM.java
+│       │   ├── Bai16_ThucHanh/              # 📌 Bài 16: Thực hành tổng hợp (CRM)
+│       │   │   ├── ThucHanhLoginCRM.java
+│       │   │   └── ThucHanhCustomerCRM.java
+│       │   │
+│       │   └── Bai17_PageObjectModel/       # 📌 Bài 17: Page Object Model (POM)
+│       │       ├── pages/
+│       │       │   └── LoginPage.java       # Page class trang Login (locator + hành động)
+│       │       └── testcases/
+│       │           ├── LoginTest.java       # Test Login dùng LoginPage (8 test case)
+│       │           ├── DashboardTest.java   # (placeholder)
+│       │           └── E2E/                 # Kịch bản End-to-End
+│       │               ├── AddTaskForCustomer.java   # (placeholder)
+│       │               └── CheckOutProduct.java      # (placeholder)
 │       │
 │       └── resources/suites/                # TestNG Suite XML
 │           ├── SuiteLoginTest.xml
@@ -446,6 +459,30 @@ SeleniumMaven012026/
   - Single-select: set `sel.value`; **multi-select** (vd Group `groups_in[]`): phải set `option.selected = true`.
   - Bắt buộc gọi `selectpicker('refresh')` để nút hiển thị cập nhật đúng giá trị.
 - **Verify sau khi Save:** xác minh redirect sang trang profile (`/admin/clients/client/<id>`), tiêu đề trang, giá trị input/textarea qua `getAttribute("value")`, và giá trị dropdown qua thuộc tính `title` của nút `button[data-id]`.
+
+---
+
+### Bài 17 — Page Object Model (POM)
+
+> Tổ chức code kiểm thử theo mô hình **Page Object Model**: mỗi trang web là một class riêng, đóng gói locator + hành động, giúp test case gọn gàng, dễ bảo trì và tái sử dụng.
+
+| File | Nội dung |
+| :--- | :--- |
+| `pages/LoginPage.java` | **Page class** cho trang Login: nhận `driver` qua constructor, khai báo locator dạng `By`, đóng gói các hành động (`loginCRM`, `setEmail`, `setPassword`, `clickLoginButton`) và các hàm verify (`verifyLoginSuccess`, `verifyLoginFail`, `verifyLoginFailWithEmailAndPasswordNull`, `verifyAlertEmailFormatInvalid`). |
+| `testcases/LoginTest.java` | 8 test case **Login** chỉ gọi các hàm của `LoginPage` — không còn locator/thao tác Selenium trực tiếp: login thành công, sai email/password, để trống email/password, để trống cả hai, sai định dạng email (validation HTML5). |
+| `testcases/DashboardTest.java` | Class placeholder cho phần test Dashboard (sẽ phát triển sau). |
+| `testcases/E2E/AddTaskForCustomer.java` | Class placeholder cho kịch bản **End-to-End** thêm Task cho Customer. |
+| `testcases/E2E/CheckOutProduct.java` | Class placeholder cho kịch bản **End-to-End** thanh toán sản phẩm. |
+
+**Kiến thức chính:**
+- **Page Object Model (POM):**
+  - Mỗi trang = 1 class trong `pages/`, mỗi class chứa locator (`By`) và các hành động của trang đó.
+  - **Constructor** nhận `WebDriver` từ test case truyền vào (`this.driver = driver`) và khởi tạo `WebDriverWait` cục bộ.
+  - Test case (`testcases/`) chỉ khởi tạo page object (`new LoginPage(driver)`) rồi gọi hành động/verify — **tách hoàn toàn** logic test khỏi chi tiết kỹ thuật UI.
+  - Phạm vi truy cập hợp lý: hàm thao tác nội bộ để `private` (`setEmail`, `setPassword`, `clickLoginButton`), hàm dùng cho test để `public` (`loginCRM`, các hàm `verify...`).
+- **Tách cấu hình:** đưa URL ra hằng số `ConfigData.URL` (class `constants/ConfigData`) thay vì viết cứng (hardcode) trong code.
+- **Đóng gói Explicit Wait** trong page class để tự chờ element trước khi thao tác/verify.
+- **Lợi ích:** giảm trùng lặp code, dễ bảo trì khi locator thay đổi (chỉ sửa 1 nơi), test case dễ đọc theo ngôn ngữ nghiệp vụ.
 
 ---
 
