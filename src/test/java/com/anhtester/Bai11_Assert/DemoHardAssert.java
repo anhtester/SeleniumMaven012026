@@ -13,7 +13,7 @@ public class DemoHardAssert extends BaseTest {
       driver.findElement(By.xpath("//input[@type='password']")).sendKeys("123456");
       driver.findElement(By.xpath("//button[normalize-space()='Login']")).click();
       Thread.sleep(2000);
-      Assert.assertEquals(driver.getCurrentUrl(), "https://crm.anhtester.com/admin/", "URL không đúng sau khi đăng nhập");
+      Assert.assertEquals(driver.getCurrentUrl(), "https://crm.anhtester.com/admin/", "LOGIN_URL không đúng sau khi đăng nhập");
 
       try{
          driver.findElement(By.xpath("//li[contains(@class, 'header-user-profile123')]")).isDisplayed();

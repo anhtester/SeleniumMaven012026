@@ -1,7 +1,7 @@
 # 📚 SeleniumMaven012026
 
 > Source code khóa học **Selenium Java 01/2026** — Anh Tester  
-> Dự án sử dụng **Selenium WebDriver 4.43** + **Java 17** + **Maven** + **TestNG 7.12** để thực hành tự động hóa kiểm thử trình duyệt web.
+> Dự án sử dụng **Selenium WebDriver 4.45** + **Java 17** + **Maven** + **TestNG 7.12** để thực hành tự động hóa kiểm thử trình duyệt web.
 
 ---
 
@@ -69,7 +69,7 @@
 
 | Thư viện / Tool          | Phiên bản | Mục đích                                    |
 | ------------------------ | --------- | -------------------------------------------- |
-| **Selenium Java**        | 4.43.0    | Tự động hóa trình duyệt web                 |
+| **Selenium Java**        | 4.45.0    | Tự động hóa trình duyệt web                 |
 | **TestNG**               | 7.12.0    | Framework quản lý và thực thi test case      |
 | **SLF4J API**            | 2.0.17    | Logging API chuẩn                            |
 | **SLF4J Simple**         | 2.0.17    | Implementation đơn giản cho SLF4J            |

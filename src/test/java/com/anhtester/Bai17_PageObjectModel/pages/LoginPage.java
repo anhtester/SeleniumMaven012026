@@ -2,7 +2,6 @@ package com.anhtester.Bai17_PageObjectModel.pages;
 
 import com.anhtester.constants.ConfigData;
 import com.anhtester.keywords.WebUI;
-import com.anhtester.locators.LocatorsCRM;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -11,7 +10,7 @@ import org.testng.Assert;
 
 import java.time.Duration;
 
-public class LoginPage {
+public class LoginPage extends BasePage{
 
    //Khai báo driver cục bộ trong chính class này
    private WebDriver driver;
@@ -23,12 +22,13 @@ public class LoginPage {
    private By inputPassword = By.xpath("//input[@id='password']");
    private By buttonLogin = By.xpath("//button[normalize-space()='Login']");
    private By errorMessage = By.xpath("//div[contains(@class,'alert-danger')]");
-   private  By alertEmailRequiredMessage = By.xpath("//div[normalize-space()='The Email Address field is required.']");
-   private  By alertPasswordRequiredMessage = By.xpath("//div[normalize-space()='The Password field is required.']");
+   private By alertEmailRequiredMessage = By.xpath("//div[normalize-space()='The Email Address field is required.']");
+   private By alertPasswordRequiredMessage = By.xpath("//div[normalize-space()='The Password field is required.']");
 
 
    //Khai báo hàm xây dựng, để truyền driver từ bên ngoài vào chính class này sử dụng
    public LoginPage(WebDriver driver) {
+      super(driver);
       this.driver = driver; //Truyền giá trị cho driver
       //driver = _driver;
       wait = new WebDriverWait(driver, Duration.ofSeconds(5)); //Khởi tạo giá trị cho wait
@@ -70,7 +70,7 @@ public class LoginPage {
       boolean checkPasswordErrorMessage = WebUI.isElementPresent(driver, alertPasswordRequiredMessage, 5);
       Assert.assertTrue(checkPasswordErrorMessage, "Fail. The Password Error Message is not present");
 
-      Assert.assertEquals(driver.getCurrentUrl(), "https://crm.anhtester.com/admin/authentication", "The Current URL is not correct");
+      Assert.assertEquals(driver.getCurrentUrl(), "https://crm.anhtester.com/admin/authentication", "The Current LOGIN_URL is not correct");
    }
 
    public void verifyAlertEmailFormatInvalid() {
@@ -83,10 +83,18 @@ public class LoginPage {
    //Các hàm xử lý cho chính trang này
    public void loginCRM(String email, String password) {
       //https://crm.anhtester.com/admin/authentication
-      driver.get(ConfigData.URL); //Gọi từ class ConfigData dạng biến static
+      driver.get(ConfigData.LOGIN_URL); //Gọi từ class ConfigData dạng biến static
       setEmail(email);
       setPassword(password);
       clickLoginButton();
+   }
+
+   public void loginCRM_AdminRole() {
+      driver.get(ConfigData.LOGIN_URL);
+      setEmail(ConfigData.EMAIL_ADMIN);
+      setPassword(ConfigData.PASSWORD_ADMIN);
+      clickLoginButton();
+      verifyLoginSuccess();
    }
 
 }

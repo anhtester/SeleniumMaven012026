@@ -31,7 +31,7 @@ public class DemoSoftAssert extends BaseTest {
       driver.findElement(By.xpath("//button[normalize-space()='Login']")).click();
       Thread.sleep(2000);
 
-      Assert.assertEquals(driver.getCurrentUrl(), "https://crm.anhtester.com/admin/", "URL không đúng sau khi đăng nhập");
+      Assert.assertEquals(driver.getCurrentUrl(), "https://crm.anhtester.com/admin/", "LOGIN_URL không đúng sau khi đăng nhập");
 
       try {
          driver.findElement(By.xpath("//li[contains(@class, 'header-user-profile')]")).isDisplayed();

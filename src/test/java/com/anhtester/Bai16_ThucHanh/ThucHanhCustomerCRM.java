@@ -91,8 +91,8 @@ public class ThucHanhCustomerCRM extends BaseTest {
         wait.until(ExpectedConditions.urlMatches(".*/admin/clients/client/\\d+$"));
         String currentUrl = driver.getCurrentUrl();
         Assert.assertTrue(currentUrl.matches(".*/admin/clients/client/\\d+$"),
-                "Save that bai - URL khong chuyen sang trang profile khach hang: " + currentUrl);
-        System.out.println("Customer da luu, URL profile: " + currentUrl);
+                "Save that bai - LOGIN_URL khong chuyen sang trang profile khach hang: " + currentUrl);
+        System.out.println("Customer da luu, LOGIN_URL profile: " + currentUrl);
 
         // 2) Tieu de trang profile = dung ten cong ty vua tao
         Assert.assertEquals(driver.getTitle(), companyName,

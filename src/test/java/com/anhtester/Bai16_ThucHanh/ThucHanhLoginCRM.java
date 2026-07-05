@@ -89,7 +89,7 @@ public class ThucHanhLoginCRM extends BaseTest {
         boolean checkPasswordErrorMessage = WebUI.isElementPresent(driver, LocatorsCRM.alertPasswordRequiredMessage, 5);
         Assert.assertTrue(checkPasswordErrorMessage, "Fail. The Password Error Message is not present");
 
-        Assert.assertEquals(driver.getCurrentUrl(), "https://crm.anhtester.com/admin/authentication", "The Current URL is not correct");
+        Assert.assertEquals(driver.getCurrentUrl(), "https://crm.anhtester.com/admin/authentication", "The Current LOGIN_URL is not correct");
 
     }
 

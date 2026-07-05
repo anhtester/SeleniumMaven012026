@@ -33,9 +33,9 @@ public class DemoBasicBrowser {
       String title = driver.getTitle();
       System.out.println("Page title: " + title);
 
-      // Get the current URL
+      // Get the current LOGIN_URL
       String url = driver.getCurrentUrl();
-      System.out.println("Page URL: " + url);
+      System.out.println("Page LOGIN_URL: " + url);
 
       // Get the current page HTML source
       String html = driver.getPageSource();
