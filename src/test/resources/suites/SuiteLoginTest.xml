@@ -1,15 +1,9 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="Regression Test" verbose="1">
-   <test name="Login Test with Chrome">
+<suite name="Demo Page Factory" verbose="1">
+   <test name="Login Test (Page Factory)">
       <classes>
-         <class name="com.anhtester.Bai9_TestNG.SeleniumTestNG" />
-      </classes>
-   </test>
-
-   <test name="Login Test with Firefox">
-      <classes>
-         <class name="com.anhtester.Bai9_TestNG.SeleniumTestNG" />
+         <class name="com.anhtester.Bai20_PageFactory.testcases.LoginTest" />
       </classes>
    </test>
 </suite>

@@ -20,6 +20,16 @@ public class WebUI {
       driver.findElement(locator).click();
    }
 
+   public static void clickElement(WebDriver driver, WebElement element, int seconds) {
+      JavascriptExecutor js = (JavascriptExecutor) driver;
+
+      WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(seconds));
+      wait.until(ExpectedConditions.elementToBeClickable(element));
+
+      js.executeScript("arguments[0].style.border='3px solid red'", element);
+      element.click();
+   }
+
    public static void clickElement(WebDriver driver, By locator) {
       JavascriptExecutor js = (JavascriptExecutor) driver;
 
@@ -61,6 +71,18 @@ public class WebUI {
          WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(seconds));
          wait.until(ExpectedConditions.presenceOfElementLocated(locator));
          driver.findElement(locator).isDisplayed();
+      }
+      catch (Exception ex) {
+         return false;
+      }
+      return true;
+   }
+
+   public static boolean isElementVisible(WebDriver driver, WebElement element, int seconds) {
+      try {
+         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(seconds));
+         wait.until(ExpectedConditions.visibilityOf(element));
+         element.isDisplayed();
       }
       catch (Exception ex) {
          return false;
