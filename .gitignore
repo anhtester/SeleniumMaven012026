@@ -25,3 +25,7 @@ out/
 *.jpeg
 *.jpg
 .playwright-mcp/
+.claude/
+.agents/
+CLAUDE.md
+AGENTS.md

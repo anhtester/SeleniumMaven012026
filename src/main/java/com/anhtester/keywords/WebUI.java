@@ -1,6 +1,7 @@
 package com.anhtester.keywords;
 
 import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -9,6 +10,7 @@ import java.time.Duration;
 public class WebUI {
 
    private static int WAIT_TIME = 5;
+   private static int WAIT_PAGE_LOAD_TIME = 30;
 
    public static void clickElement(WebDriver driver, By locator, int seconds) {
       JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -59,8 +61,7 @@ public class WebUI {
    public static boolean isElementPresent(WebDriver driver, By locator) {
       try {
          driver.findElement(locator).isDisplayed();
-      }
-      catch (Exception ex) {
+      } catch (Exception ex) {
          return false;
       }
       return true;
@@ -71,8 +72,7 @@ public class WebUI {
          WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(seconds));
          wait.until(ExpectedConditions.presenceOfElementLocated(locator));
          driver.findElement(locator).isDisplayed();
-      }
-      catch (Exception ex) {
+      } catch (Exception ex) {
          return false;
       }
       return true;
@@ -83,10 +83,44 @@ public class WebUI {
          WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(seconds));
          wait.until(ExpectedConditions.visibilityOf(element));
          element.isDisplayed();
-      }
-      catch (Exception ex) {
+      } catch (Exception ex) {
          return false;
       }
       return true;
+   }
+
+   public static void waitForPageLoaded(WebDriver driver) {
+      WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(WAIT_PAGE_LOAD_TIME));
+      ExpectedCondition<Boolean> jsLoad = webDriver ->
+              ((JavascriptExecutor) webDriver)
+                      .executeScript("return document.readyState")
+                      .equals("complete");
+
+      wait.until(jsLoad);
+
+      waitForJQueryLoad(driver);
+      waitForAngularLoad(driver);
+   }
+
+   private static void waitForJQueryLoad(WebDriver driver) {
+      WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(WAIT_PAGE_LOAD_TIME));
+      try {
+         wait.until(_driver -> (Boolean) ((JavascriptExecutor) driver)
+                 .executeScript(
+                         "return window.jQuery == undefined || jQuery.active == 0"));
+      } catch (Exception ignored) {
+      }
+   }
+
+   private static void waitForAngularLoad(WebDriver driver) {
+      WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(WAIT_PAGE_LOAD_TIME));
+      try {
+         wait.until(_driver -> (Boolean) ((JavascriptExecutor) driver)
+                 .executeScript(
+                         "return window.getAllAngularTestabilities ? " +
+                                 "window.getAllAngularTestabilities()" +
+                                 ".every(x=>x.isStable()) : true"));
+      } catch (Exception ignored) {
+      }
    }
 }
