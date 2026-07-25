@@ -601,7 +601,7 @@ SeleniumMaven012026/
 **Kiến thức chính:**
 - **Fluent chaining:** hàm ở lại trang trả về `this` nên test case viết liền mạch:
   ```java
-customersPage.verifyNavigateToCustomersPage()
+  customersPage.verifyNavigateToCustomersPage()
           .clickNewCustomerButton()
           .fillCustomerDetails(companyName, vatNumber, phone, website)
           .clickSaveButton()
