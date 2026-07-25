@@ -74,32 +74,42 @@ public class CustomersPage extends BasePage {
       wait = new WebDriverWait(driver, Duration.ofSeconds(10));
    }
 
-   public void openCustomersPage() {
+   //Khai báo trả về theo kiểu Fluent Page
+   //Trả về chính class này, để thuận tiện quá trình gọi sử dụng tại class test
+   public CustomersPage openCustomersPage() {
       driver.get(ConfigData.BASE_URL + customersPageUrl);
       WebUI.waitForPageLoaded(driver);
       wait.until(ExpectedConditions.visibilityOfElementLocated(headerCustomersSummary));
+
+      return this;
    }
 
-   public void verifyNavigateToCustomersPage() {
+   public CustomersPage verifyNavigateToCustomersPage() {
       WebUI.waitForPageLoaded(driver);
       wait.until(ExpectedConditions.visibilityOfElementLocated(headerCustomersSummary));
       wait.until(ExpectedConditions.urlContains(customersPageUrl));
+
+      return this;
    }
 
-   public void clickNewCustomerButton() {
+   public CustomersPage clickNewCustomerButton() {
       wait.until(ExpectedConditions.elementToBeClickable(buttonNewCustomer));
       driver.findElement(buttonNewCustomer).click();
       WebUI.waitForPageLoaded(driver);
       wait.until(ExpectedConditions.visibilityOfElementLocated(inputCompany));
+
+      return this;
    }
 
-   public void verifyNavigateToAddNewCustomerPage() {
+   public CustomersPage verifyNavigateToAddNewCustomerPage() {
       WebUI.waitForPageLoaded(driver);
       wait.until(ExpectedConditions.visibilityOfElementLocated(inputCompany));
       wait.until(ExpectedConditions.urlContains(addNewCustomerPageUrl));
+
+      return this;
    }
 
-   public void searchCustomer(String keyword) {
+   public CustomersPage searchCustomer(String keyword) {
       wait.until(ExpectedConditions.visibilityOfElementLocated(inputSearchCustomer));
       driver.findElement(inputSearchCustomer).clear();
       driver.findElement(inputSearchCustomer).sendKeys(keyword);
@@ -109,100 +119,132 @@ public class CustomersPage extends BasePage {
             return tableText.contains(keyword) || tableText.contains("No matching records found");
          });
       }
+
+      return this;
    }
 
-   public void clickCustomerDetailsTab() {
+   public CustomersPage clickCustomerDetailsTab() {
       wait.until(ExpectedConditions.elementToBeClickable(tabCustomerDetails));
       driver.findElement(tabCustomerDetails).click();
       wait.until(ExpectedConditions.visibilityOfElementLocated(inputCompany));
+
+      return this;
    }
 
-   public void clickBillingAndShippingTab() {
+   public CustomersPage clickBillingAndShippingTab() {
       wait.until(ExpectedConditions.elementToBeClickable(tabBillingAndShipping));
       driver.findElement(tabBillingAndShipping).click();
       wait.until(ExpectedConditions.visibilityOfElementLocated(textareaBillingStreet));
+
+      return this;
    }
 
-   public void setShowPrimaryContactOnDocuments(boolean isChecked) {
+   public CustomersPage setShowPrimaryContactOnDocuments(boolean isChecked) {
       clickCustomerDetailsTab();
       WebElement checkbox = wait.until(ExpectedConditions.presenceOfElementLocated(checkboxShowPrimaryContact));
       if (checkbox.isSelected() != isChecked) {
          wait.until(ExpectedConditions.elementToBeClickable(labelShowPrimaryContact));
          driver.findElement(labelShowPrimaryContact).click();
       }
+
+      return this;
    }
 
-   public void fillCustomerDetails(String company, String vatNumber, String phone, String website) {
+   public CustomersPage fillCustomerDetails(String company, String vatNumber, String phone, String website) {
       clickCustomerDetailsTab();
       setText(inputCompany, company);
       setText(inputVatNumber, vatNumber);
       setText(inputPhone, phone);
       setText(inputWebsite, website);
+
+      return this;
    }
 
-   public void selectGroups(String groupName) {
+   public CustomersPage selectGroups(String groupName) {
       selectPickerByText(selectGroups, "groups_in[]", groupName);
+
+      return this;
    }
 
-   public void selectDefaultCurrency(String currencyName) {
+   public CustomersPage selectDefaultCurrency(String currencyName) {
       selectPickerByText(selectDefaultCurrency, "default_currency", currencyName);
+
+      return this;
    }
 
-   public void selectDefaultLanguage(String languageName) {
+   public CustomersPage selectDefaultLanguage(String languageName) {
       selectPickerByText(selectDefaultLanguage, "default_language", languageName);
+
+      return this;
    }
 
-   public void fillAddress(String address, String city, String state, String zipCode, String countryName) {
+   public CustomersPage fillAddress(String address, String city, String state, String zipCode, String countryName) {
       clickCustomerDetailsTab();
       setText(textareaAddress, address);
       setText(inputCity, city);
       setText(inputState, state);
       setText(inputZipCode, zipCode);
       selectPickerByText(selectCountry, "country", countryName);
+
+      return this;
    }
 
-   public void fillBillingAddress(String street, String city, String state, String zipCode, String countryName) {
+   public CustomersPage fillBillingAddress(String street, String city, String state, String zipCode, String countryName) {
       clickBillingAndShippingTab();
       setText(textareaBillingStreet, street);
       setText(inputBillingCity, city);
       setText(inputBillingState, state);
       setText(inputBillingZipCode, zipCode);
       selectPickerByText(selectBillingCountry, "billing_country", countryName);
+
+      return this;
    }
 
-   public void fillShippingAddress(String street, String city, String state, String zipCode, String countryName) {
+   public CustomersPage fillShippingAddress(String street, String city, String state, String zipCode, String countryName) {
       clickBillingAndShippingTab();
       setText(textareaShippingStreet, street);
       setText(inputShippingCity, city);
       setText(inputShippingState, state);
       setText(inputShippingZipCode, zipCode);
       selectPickerByText(selectShippingCountry, "shipping_country", countryName);
+
+      return this;
    }
 
-   public void clickBillingSameAsCustomerInfo() {
+   public CustomersPage clickBillingSameAsCustomerInfo() {
       clickBillingAndShippingTab();
       wait.until(ExpectedConditions.elementToBeClickable(linkBillingSameAsCustomerInfo));
       driver.findElement(linkBillingSameAsCustomerInfo).click();
+
+      return this;
    }
 
-   public void clickCopyBillingAddress() {
+   public CustomersPage clickCopyBillingAddress() {
       clickBillingAndShippingTab();
       wait.until(ExpectedConditions.elementToBeClickable(linkCopyBillingAddress));
       driver.findElement(linkCopyBillingAddress).click();
+
+      return this;
    }
 
-   public void clickSaveButton() {
+   public CustomersPage clickSaveButton() {
       WebUI.clickElement(driver, buttonSave);
+
+      return this;
    }
 
-   public void clickSaveAndCreateContactButton() {
+   public CustomersPage clickSaveAndCreateContactButton() {
       WebUI.clickElement(driver, buttonSaveAndCreateContact);
+
+      return this;
    }
 
-   public void waitForCustomerProfilePage() {
+   public CustomersPage waitForCustomerProfilePage() {
       WebUI.waitForPageLoaded(driver);
       wait.until(ExpectedConditions.urlMatches(".*/admin/clients/client/\\d+$"));
       wait.until(ExpectedConditions.visibilityOfElementLocated(inputCompany));
+
+      return this;
    }
 
    public boolean isCustomersTableDisplayed() {
@@ -220,7 +262,7 @@ public class CustomersPage extends BasePage {
       return wait.until(driver -> !this.driver.findElement(tableCustomersBody).getText().contains(companyName));
    }
 
-   public void deleteCustomerByCompanyName(String companyName) {
+   public CustomersPage deleteCustomerByCompanyName(String companyName) {
       searchCustomer(companyName);
       By deleteCustomerLink = getDeleteCustomerLink(companyName);
       String deleteUrl = wait.until(driver -> {
@@ -235,9 +277,11 @@ public class CustomersPage extends BasePage {
       wait.until(ExpectedConditions.visibilityOfElementLocated(headerCustomersSummary));
       searchCustomer(companyName);
       wait.until(driver -> !this.driver.findElement(tableCustomersBody).getText().contains(companyName));
+
+      return this;
    }
 
-   public void deleteCustomerByHoverAndConfirmAlert(String companyName) {
+   public CustomersPage deleteCustomerByHoverAndConfirmAlert(String companyName) {
       searchCustomer(companyName);
 
       By companyNameLink = getCompanyNameLink(companyName);
@@ -253,6 +297,8 @@ public class CustomersPage extends BasePage {
       confirmAlert.accept();
 
       wait.until(driver -> !this.driver.findElement(tableCustomersBody).getText().contains(companyName));
+
+      return this;
    }
 
    public String getPageTitle() {
@@ -337,25 +383,6 @@ public class CustomersPage extends BasePage {
 
    private By getCompanyNameLink(String companyName) {
       return By.xpath("//table[@id='clients']//tbody/tr[contains(., " + xpathLiteral(companyName) + ")]//td[contains(@class,'sorting_1')]/a[normalize-space()=" + xpathLiteral(companyName) + "]");
-   }
-
-   private String xpathLiteral(String text) {
-      if (!text.contains("'")) {
-         return "'" + text + "'";
-      }
-      if (!text.contains("\"")) {
-         return "\"" + text + "\"";
-      }
-      String[] parts = text.split("'");
-      StringBuilder builder = new StringBuilder("concat(");
-      for (int i = 0; i < parts.length; i++) {
-         if (i > 0) {
-            builder.append(", \"'\", ");
-         }
-         builder.append("'").append(parts[i]).append("'");
-      }
-      builder.append(")");
-      return builder.toString();
    }
 
    private void selectPickerByText(By selectLocator, String selectId, String visibleText) {

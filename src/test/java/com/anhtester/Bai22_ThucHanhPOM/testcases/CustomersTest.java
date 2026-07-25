@@ -1,8 +1,11 @@
 package com.anhtester.Bai22_ThucHanhPOM.testcases;
 
 import com.anhtester.Bai22_ThucHanhPOM.pages.CustomersPage;
+import com.anhtester.Bai22_ThucHanhPOM.pages.DashboardPage;
 import com.anhtester.Bai22_ThucHanhPOM.pages.LoginPage;
 import com.anhtester.common.BaseTest;
+import com.anhtester.constants.ConfigData;
+import com.anhtester.utils.JsonUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -10,12 +13,12 @@ import org.testng.annotations.Test;
 public class CustomersTest extends BaseTest {
 
    private LoginPage loginPage;
+   private DashboardPage dashboardPage;
    private CustomersPage customersPage;
 
    @BeforeMethod
    public void setUp() {
       loginPage = new LoginPage(driver);
-      customersPage = new CustomersPage(driver);
    }
 
    @Test
@@ -31,19 +34,23 @@ public class CustomersTest extends BaseTest {
       String zipCode = "90000";
       String country = "Vietnam";
 
-      loginPage.loginCRM_AdminRole();
-      customersPage.openCustomersPage();
-      customersPage.verifyNavigateToCustomersPage();
-      customersPage.clickNewCustomerButton();
-      customersPage.verifyNavigateToAddNewCustomerPage();
+      //Liên kết trang: LoginPage -> DashboardPage -> CustomersPage
+      dashboardPage = loginPage.loginCRM_AdminRole();
+      dashboardPage.verifyNavigateToDashboardPage();
+      customersPage = dashboardPage.clickCustomersMenu();
 
-      customersPage.fillCustomerDetails(companyName, vatNumber, phone, website);
-      customersPage.selectDefaultCurrency("USD");
-      customersPage.selectDefaultLanguage("Vietnamese");
-      customersPage.fillAddress(address, city, state, zipCode, country);
-      customersPage.clickSaveButton();
-      customersPage.waitForCustomerProfilePage();
+      customersPage.verifyNavigateToCustomersPage()
+              .clickNewCustomerButton()
+              .verifyNavigateToAddNewCustomerPage()
+              .fillCustomerDetails(companyName, vatNumber, phone, website)
+              .selectDefaultCurrency("USD")
+              .selectDefaultLanguage("Vietnamese")
+              .fillAddress(address, city, state, zipCode, country)
+              .clickSaveButton()
+              .waitForCustomerProfilePage();
 
+      //Tuân theo mô hình AAA
+      //Nghĩa là phần Assert nằm tại class test
       Assert.assertEquals(customersPage.getPageTitle(), companyName, "Tên công ty trên title trang profile không đúng.");
       Assert.assertEquals(customersPage.getCompanyValue(), companyName, "Company lưu không đúng.");
       Assert.assertEquals(customersPage.getVatNumberValue(), vatNumber, "VAT Number lưu không đúng.");
@@ -56,6 +63,12 @@ public class CustomersTest extends BaseTest {
       Assert.assertEquals(customersPage.getSelectedCountryValue(), country, "Country lưu không đúng.");
       Assert.assertEquals(customersPage.getSelectedDefaultCurrencyValue(), "USD", "Default Currency lưu không đúng.");
       Assert.assertEquals(customersPage.getSelectedDefaultLanguageValue(), "Vietnamese", "Default Language lưu không đúng.");
+
+      //Lưu Customer Name ra file JSON trung gian để test case Project Manage dùng lại
+      JsonUtils.setDataToJsonFile(ConfigData.CUSTOMER_DATA_FILE, ConfigData.KEY_CUSTOMER_NAME, customersPage.getCompanyValue());
+
+      Assert.assertEquals(JsonUtils.getValueFromJsonFile(ConfigData.CUSTOMER_DATA_FILE, ConfigData.KEY_CUSTOMER_NAME),
+              companyName, "Customer Name lưu vào file JSON không đúng.");
    }
 
    @Test
@@ -66,14 +79,19 @@ public class CustomersTest extends BaseTest {
       String phone = String.format("091%07d", Long.parseLong(timestamp.substring(timestamp.length() - 7)));
       String website = "https://anhtester.com";
 
-      loginPage.loginCRM_AdminRole();
-      customersPage.openCustomersPage();
-      customersPage.clickNewCustomerButton();
-      customersPage.fillCustomerDetails(companyName, vatNumber, phone, website);
-      customersPage.clickSaveButton();
-      customersPage.waitForCustomerProfilePage();
+      //Liên kết trang: LoginPage -> DashboardPage -> CustomersPage
+      dashboardPage = loginPage.loginCRM_AdminRole();
+      customersPage = dashboardPage.clickCustomersMenu();
 
-      customersPage.openCustomersPage();
+      customersPage.verifyNavigateToCustomersPage()
+              .clickNewCustomerButton()
+              .fillCustomerDetails(companyName, vatNumber, phone, website)
+              .clickSaveButton()
+              .waitForCustomerProfilePage();
+
+      //Quay lại danh sách Customers bằng menu (liên kết trang từ BasePage)
+      customersPage = customersPage.clickCustomersMenu();
+      customersPage.verifyNavigateToCustomersPage();
       Assert.assertTrue(customersPage.isCustomerDisplayed(companyName), "Customer vừa tạo phải hiển thị trong danh sách trước khi xóa.");
 
       customersPage.deleteCustomerByCompanyName(companyName);
@@ -89,14 +107,25 @@ public class CustomersTest extends BaseTest {
       String phone = String.format("092%07d", Long.parseLong(timestamp.substring(timestamp.length() - 7)));
       String website = "https://anhtester.com";
 
-      loginPage.loginCRM_AdminRole();
-      customersPage.openCustomersPage();
-      customersPage.clickNewCustomerButton();
-      customersPage.fillCustomerDetails(companyName, vatNumber, phone, website);
-      customersPage.clickSaveButton();
-      customersPage.waitForCustomerProfilePage();
+      //Liên kết trang: LoginPage -> DashboardPage -> CustomersPage
+      dashboardPage = loginPage.loginCRM_AdminRole();
+      customersPage = dashboardPage.clickCustomersMenu();
 
-      customersPage.openCustomersPage();
+      //Fluent Page
+      customersPage.verifyNavigateToCustomersPage()
+              .clickNewCustomerButton()
+              .fillCustomerDetails(companyName, vatNumber, phone, website)
+              .clickSaveButton()
+              .waitForCustomerProfilePage();
+
+      //Page Pbject Model thuần tuý
+//      customersPage.verifyNavigateToCustomersPage();
+//      customersPage.clickNewCustomerButton();
+//      customersPage.fillCustomerDetails(companyName, vatNumber, phone, website);
+
+      //Quay lại danh sách Customers bằng menu (liên kết trang từ BasePage)
+      customersPage = customersPage.clickCustomersMenu();
+      customersPage.verifyNavigateToCustomersPage();
       Assert.assertTrue(customersPage.isCustomerDisplayed(companyName), "Customer vừa tạo phải hiển thị trong danh sách trước khi xóa.");
 
       customersPage.deleteCustomerByHoverAndConfirmAlert(companyName);

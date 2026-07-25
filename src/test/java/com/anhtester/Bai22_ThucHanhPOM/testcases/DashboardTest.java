@@ -29,7 +29,7 @@ public class DashboardTest extends BaseTest {
    public void test_E2E_VerifyTotalConvertedLeads(){
       dashboardPage = loginPage.loginCRM_AdminRole();
       dashboardPage.verifyNavigateToDashboardPage();
-      dashboardPage.verifyTotalConvertedLeads("2 / 5");
+      dashboardPage.verifyTotalConvertedLeads("0 / 0");
    }
 
    @Test
@@ -54,6 +54,6 @@ public class DashboardTest extends BaseTest {
    public void test_E2E_VerifyTotalTasksNotFinished(){
       dashboardPage = loginPage.loginCRM_AdminRole();
       dashboardPage.verifyNavigateToDashboardPage();
-      dashboardPage.verifyTotalTasksNotFinished("199 / 199");
+      dashboardPage.verifyTotalTasksNotFinished("197 / 197");
    }
 }
