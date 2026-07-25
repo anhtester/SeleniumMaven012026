@@ -3,11 +3,11 @@
 <suite name="Regression Test" verbose="1">
    <test name="Test on Chrome">
       <classes>
-         <class name="com.anhtester.Bai22_ThucHanhPOM.testcases.LoginTest" />
-         <class name="com.anhtester.Bai22_ThucHanhPOM.testcases.DashboardTest" />
-         <class name="com.anhtester.Bai22_ThucHanhPOM.testcases.CustomersTest" />
-         <class name="com.anhtester.Bai22_ThucHanhPOM.testcases.ProjectsTest" />
-         <class name="com.anhtester.Bai22_ThucHanhPOM.testcases.TasksTest" />
+         <class name="com.anhtester.Bai22_23_ThucHanhPOM.testcases.LoginTest" />
+         <class name="com.anhtester.Bai22_23_ThucHanhPOM.testcases.DashboardTest" />
+         <class name="com.anhtester.Bai22_23_ThucHanhPOM.testcases.CustomersTest" />
+         <class name="com.anhtester.Bai22_23_ThucHanhPOM.testcases.ProjectsTest" />
+         <class name="com.anhtester.Bai22_23_ThucHanhPOM.testcases.TasksTest" />
       </classes>
    </test>
 </suite>

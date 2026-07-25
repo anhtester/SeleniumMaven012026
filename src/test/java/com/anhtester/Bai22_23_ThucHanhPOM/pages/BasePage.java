@@ -1,4 +1,4 @@
-package com.anhtester.Bai22_ThucHanhPOM.pages;
+package com.anhtester.Bai22_23_ThucHanhPOM.pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;

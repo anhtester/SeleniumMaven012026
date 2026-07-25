@@ -1,8 +1,8 @@
-package com.anhtester.Bai22_ThucHanhPOM.testcases;
+package com.anhtester.Bai22_23_ThucHanhPOM.testcases;
 
-import com.anhtester.Bai22_ThucHanhPOM.pages.DashboardPage;
-import com.anhtester.Bai22_ThucHanhPOM.pages.LoginPage;
-import com.anhtester.Bai22_ThucHanhPOM.pages.ProjectsPage;
+import com.anhtester.Bai22_23_ThucHanhPOM.pages.DashboardPage;
+import com.anhtester.Bai22_23_ThucHanhPOM.pages.LoginPage;
+import com.anhtester.Bai22_23_ThucHanhPOM.pages.ProjectsPage;
 import com.anhtester.common.BaseTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

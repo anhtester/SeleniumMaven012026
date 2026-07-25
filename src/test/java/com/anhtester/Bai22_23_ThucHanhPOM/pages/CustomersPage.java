@@ -1,4 +1,4 @@
-package com.anhtester.Bai22_ThucHanhPOM.pages;
+package com.anhtester.Bai22_23_ThucHanhPOM.pages;
 
 import com.anhtester.constants.ConfigData;
 import com.anhtester.keywords.WebUI;

@@ -1,7 +1,7 @@
 # 📚 SeleniumMaven012026
 
 > Source code khóa học **Selenium Java 01/2026** — Anh Tester  
-> Dự án sử dụng **Selenium WebDriver 4.45** + **Java 17** + **Maven** + **TestNG 7.12** để thực hành tự động hóa kiểm thử trình duyệt web.
+> Dự án sử dụng **Selenium WebDriver 4.46** + **Java 17** + **Maven** + **TestNG 7.12** để thực hành tự động hóa kiểm thử trình duyệt web.
 
 ---
 
@@ -25,6 +25,10 @@
   - [Bài 15 — Waits (Implicit & Explicit)](#bài-15--waits-implicit--explicit)
   - [Bài 16 — Thực hành tổng hợp (CRM)](#bài-16--thực-hành-tổng-hợp-crm)
   - [Bài 17 — Page Object Model (POM)](#bài-17--page-object-model-pom)
+  - [Bài 20 — Page Factory](#bài-20--page-factory)
+  - [Bài 21 — Page Navigation (Liên kết trang)](#bài-21--page-navigation-liên-kết-trang)
+  - [Bài 22 & 23 — Thực hành POM hoàn chỉnh](#bài-22--23--thực-hành-pom-hoàn-chỉnh)
+- [Dữ liệu trung gian giữa các test case](#-dữ-liệu-trung-gian-giữa-các-test-case)
 - [Cách chạy test](#-cách-chạy-test)
 - [Giấy phép](#-giấy-phép)
 
@@ -69,8 +73,9 @@
 
 | Thư viện / Tool          | Phiên bản | Mục đích                                    |
 | ------------------------ | --------- | -------------------------------------------- |
-| **Selenium Java**        | 4.45.0    | Tự động hóa trình duyệt web                 |
+| **Selenium Java**        | 4.46.0    | Tự động hóa trình duyệt web                 |
 | **TestNG**               | 7.12.0    | Framework quản lý và thực thi test case      |
+| **Gson**                 | 2.11.0    | Đọc/ghi file JSON trung gian chia sẻ test data |
 | **SLF4J API**            | 2.0.17    | Logging API chuẩn                            |
 | **SLF4J Simple**         | 2.0.17    | Implementation đơn giản cho SLF4J            |
 | **Maven Surefire Plugin**| 3.5.5     | Plugin chạy test và tích hợp TestNG suite    |
@@ -89,18 +94,17 @@ SeleniumMaven012026/
 │   ├── main/java/com/anhtester/
 │   │   ├── Main.java               # Entry point (demo)
 │   │   ├── constants/
-│   │   │   └── ConfigData.java     # Hằng số cấu hình dùng chung (URL...)
+│   │   │   └── ConfigData.java     # Hằng số dùng chung (URL, tài khoản, tên file JSON test data)
 │   │   ├── keywords/
 │   │   │   └── WebUI.java          # Lớp keyword dùng chung (setText, clickElement, isElementPresent...)
 │   │   └── utils/
 │   │       ├── CaptureUtils.java       # Chụp màn hình bằng Robot class
 │   │       ├── ColorUtils.java         # Lấy mã màu HEX của pixel trên màn hình
+│   │       ├── JsonUtils.java          # Đọc/ghi test data ra file JSON trung gian (Gson)
 │   │       └── LocalStorageUtils.java  # Đọc/ghi Local Storage qua JavascriptExecutor
 │   │
 │   └── test/
 │       ├── java/com/anhtester/
-│       │   ├── DemoSelenium.java            # Demo Selenium cơ bản
-│       │   ├── TestSelenium.java            # Các test case Selenium đơn giản
 │       │   ├── common/
 │       │   │   └── BaseTest.java            # Base class: setup/teardown driver + hàm sleep()
 │       │   ├── locators/
@@ -171,21 +175,63 @@ SeleniumMaven012026/
 │       │   │   ├── ThucHanhLoginCRM.java
 │       │   │   └── ThucHanhCustomerCRM.java
 │       │   │
-│       │   └── Bai17_PageObjectModel/       # 📌 Bài 17: Page Object Model (POM)
+│       │   ├── Bai17_PageObjectModel/       # 📌 Bài 17: Page Object Model (POM)
+│       │   │   ├── pages/
+│       │   │   │   ├── BasePage.java        # Menu chung (Dashboard, Customers, Projects)
+│       │   │   │   ├── LoginPage.java
+│       │   │   │   ├── DashboardPage.java
+│       │   │   │   └── ProjectsPage.java
+│       │   │   └── testcases/
+│       │   │       ├── LoginTest.java
+│       │   │       ├── DashboardTest.java
+│       │   │       └── E2E/
+│       │   │           └── AddTaskForCustomer.java   # (placeholder)
+│       │   │
+│       │   ├── Bai20_PageFactory/           # 📌 Bài 20: Page Factory (@FindBy)
+│       │   │   ├── pages/
+│       │   │   │   ├── BasePage.java
+│       │   │   │   ├── LoginPage.java       # @FindBy, @FindAll, @CacheLookup
+│       │   │   │   └── DashboardPage.java
+│       │   │   └── testcases/
+│       │   │       ├── LoginTest.java
+│       │   │       └── DashboardTest.java
+│       │   │
+│       │   ├── Bai21_PageNavigation/        # 📌 Bài 21: Liên kết trang (Page Navigation)
+│       │   │   ├── pages/
+│       │   │   │   ├── BasePage.java        # Hàm click menu trả về Page object
+│       │   │   │   ├── LoginPage.java
+│       │   │   │   ├── DashboardPage.java
+│       │   │   │   └── ProjectsPage.java
+│       │   │   └── testcases/
+│       │   │       ├── LoginTest.java
+│       │   │       └── DashboardTest.java
+│       │   │
+│       │   └── Bai22_23_ThucHanhPOM/        # 📌 Bài 22 & 23: Thực hành POM hoàn chỉnh
 │       │       ├── pages/
-│       │       │   └── LoginPage.java       # Page class trang Login (locator + hành động)
+│       │       │   ├── BasePage.java        # Menu + helper xpathLiteral dùng chung
+│       │       │   ├── LoginPage.java
+│       │       │   ├── DashboardPage.java
+│       │       │   ├── CustomersPage.java   # Danh sách + form Add New Customer
+│       │       │   ├── ProjectsPage.java    # Danh sách + form Add/Delete Project
+│       │       │   └── TasksPage.java       # Danh sách + modal Add New Task
 │       │       └── testcases/
-│       │           ├── LoginTest.java       # Test Login dùng LoginPage (8 test case)
-│       │           ├── DashboardTest.java   # (placeholder)
-│       │           └── E2E/                 # Kịch bản End-to-End
-│       │               ├── AddTaskForCustomer.java   # (placeholder)
-│       │               └── CheckOutProduct.java      # (placeholder)
+│       │           ├── LoginTest.java       # 8 TC Login
+│       │           ├── DashboardTest.java   # 4 TC thống kê Dashboard
+│       │           ├── CustomersTest.java   # 3 TC: thêm mới + 2 cách xóa Customer
+│       │           ├── ProjectsTest.java    # 2 TC: thêm mới + xóa Project
+│       │           └── TasksTest.java       # 1 TC: thêm Task gắn với Project
 │       │
-│       └── resources/suites/                # TestNG Suite XML
-│           ├── SuiteLoginTest.xml
-│           ├── SuiteCustomerTest.xml
-│           ├── SuiteAnnotations.xml
-│           └── SuiteLoginTest_Annotation.xml
+│       └── resources/
+│           ├── suites/                      # TestNG Suite XML
+│           │   ├── SuiteLoginTest.xml
+│           │   ├── SuiteCustomerTest.xml
+│           │   ├── SuiteAnnotations.xml
+│           │   ├── SuiteLoginTest_Annotation.xml
+│           │   └── SuiteRegresionThucHanhPOM.xml   # Chạy toàn bộ Bài 22 & 23
+│           │
+│           └── testdata/                    # File JSON trung gian (tự sinh khi chạy test)
+│               ├── customer_data.json
+│               └── project_data.json
 │
 └── target/                          # Thư mục output (auto-generated)
 ```
@@ -443,7 +489,7 @@ SeleniumMaven012026/
 
 ### Bài 16 — Thực hành tổng hợp (CRM)
 
-> Bài thực hành cuối: kết hợp toàn bộ kiến thức để kiểm thử website **Perfex CRM** (`crm.anhtester.com`) theo mô hình có tổ chức.
+> Bài thực hành: kết hợp toàn bộ kiến thức để kiểm thử website **Perfex CRM** (`crm.anhtester.com`) theo mô hình có tổ chức.
 
 | File | Nội dung |
 | :--- | :--- |
@@ -468,21 +514,135 @@ SeleniumMaven012026/
 
 | File | Nội dung |
 | :--- | :--- |
-| `pages/LoginPage.java` | **Page class** cho trang Login: nhận `driver` qua constructor, khai báo locator dạng `By`, đóng gói các hành động (`loginCRM`, `setEmail`, `setPassword`, `clickLoginButton`) và các hàm verify (`verifyLoginSuccess`, `verifyLoginFail`, `verifyLoginFailWithEmailAndPasswordNull`, `verifyAlertEmailFormatInvalid`). |
-| `testcases/LoginTest.java` | 8 test case **Login** chỉ gọi các hàm của `LoginPage` — không còn locator/thao tác Selenium trực tiếp: login thành công, sai email/password, để trống email/password, để trống cả hai, sai định dạng email (validation HTML5). |
-| `testcases/DashboardTest.java` | Class placeholder cho phần test Dashboard (sẽ phát triển sau). |
-| `testcases/E2E/AddTaskForCustomer.java` | Class placeholder cho kịch bản **End-to-End** thêm Task cho Customer. |
-| `testcases/E2E/CheckOutProduct.java` | Class placeholder cho kịch bản **End-to-End** thanh toán sản phẩm. |
+| `pages/BasePage.java` | Page class **cha**: chứa locator menu dùng chung (Dashboard, Customers, Projects) và các hàm click menu — mọi page khác kế thừa lại. |
+| `pages/LoginPage.java` | Page class trang Login: khai báo locator dạng `By`, đóng gói hành động (`loginCRM`, `loginCRM_AdminRole`, `setEmail`, `setPassword`, `clickLoginButton`) và các hàm verify. |
+| `pages/DashboardPage.java` | Page class Dashboard: verify điều hướng và đọc các ô thống kê nhanh (Invoices Awaiting Payment, Converted Leads, Projects In Progress, Tasks Not Finished). |
+| `pages/ProjectsPage.java` | Page class Projects: verify điều hướng và đọc số lượng project theo từng trạng thái. |
+| `testcases/LoginTest.java` | 8 test case **Login** chỉ gọi các hàm của `LoginPage` — không còn locator/thao tác Selenium trực tiếp. |
+| `testcases/DashboardTest.java` | Test **E2E**: login → sang Projects đếm tổng project theo trạng thái → quay lại Dashboard và đối chiếu với ô "Projects In Progress". |
+| `testcases/E2E/AddTaskForCustomer.java` | Class placeholder cho kịch bản End-to-End thêm Task cho Customer. |
 
 **Kiến thức chính:**
 - **Page Object Model (POM):**
   - Mỗi trang = 1 class trong `pages/`, mỗi class chứa locator (`By`) và các hành động của trang đó.
   - **Constructor** nhận `WebDriver` từ test case truyền vào (`this.driver = driver`) và khởi tạo `WebDriverWait` cục bộ.
   - Test case (`testcases/`) chỉ khởi tạo page object (`new LoginPage(driver)`) rồi gọi hành động/verify — **tách hoàn toàn** logic test khỏi chi tiết kỹ thuật UI.
-  - Phạm vi truy cập hợp lý: hàm thao tác nội bộ để `private` (`setEmail`, `setPassword`, `clickLoginButton`), hàm dùng cho test để `public` (`loginCRM`, các hàm `verify...`).
-- **Tách cấu hình:** đưa URL ra hằng số `ConfigData.URL` (class `constants/ConfigData`) thay vì viết cứng (hardcode) trong code.
+  - Phạm vi truy cập hợp lý: hàm thao tác nội bộ để `private`, hàm dùng cho test để `public`.
+- **BasePage:** gom phần dùng chung của mọi trang (menu điều hướng) vào một class cha để tránh lặp code.
+- **Tách cấu hình:** đưa URL, tài khoản ra `ConfigData` thay vì viết cứng (hardcode) trong code.
 - **Đóng gói Explicit Wait** trong page class để tự chờ element trước khi thao tác/verify.
-- **Lợi ích:** giảm trùng lặp code, dễ bảo trì khi locator thay đổi (chỉ sửa 1 nơi), test case dễ đọc theo ngôn ngữ nghiệp vụ.
+
+---
+
+### Bài 20 — Page Factory
+
+> Cách khai báo element bằng **annotation** thay cho biến `By`, sử dụng `PageFactory` của Selenium.
+
+| File | Nội dung |
+| :--- | :--- |
+| `pages/LoginPage.java` | Khai báo element bằng `@FindBy`, `@FindAll` (thử nhiều locator cho tới khi tìm thấy) và `@CacheLookup` (cache element sau lần tìm đầu tiên). Khởi tạo bằng `PageFactory.initElements(driver, this)` trong constructor. |
+| `pages/DashboardPage.java` | Lấy **danh sách menu** bên trái bằng `@FindBy` + `List<WebElement>`, trả về `List<String>` để so sánh với danh sách mong đợi. |
+| `testcases/LoginTest.java` | Test Login dùng page class kiểu Page Factory. |
+| `testcases/DashboardTest.java` | Test kiểm tra danh sách menu của tài khoản Admin đúng và đủ thứ tự. |
+
+**Kiến thức chính:**
+- `PageFactory.initElements(driver, this)` — **bắt buộc** gọi trong constructor, nếu quên sẽ bị `NullPointerException`.
+- **`@FindBy`** — khai báo locator ngay trên biến `WebElement`, element được tìm **lazy** (chỉ tìm khi gọi hành động).
+- **`@FindAll`** — gom nhiều `@FindBy` (điều kiện **OR**), hữu ích khi locator có thể thay đổi giữa các môi trường.
+- **`@FindBys`** — kết hợp nhiều `@FindBy` theo điều kiện **AND** (lồng nhau).
+- **`@CacheLookup`** — cache element sau lần tìm đầu, tăng tốc nhưng **dễ gây `StaleElementReferenceException`** với trang động → chỉ dùng cho element tĩnh.
+- **So sánh với POM dùng `By`:** Page Factory viết ngắn gọn hơn, nhưng dùng `By` linh hoạt hơn khi cần locator động (ghép chuỗi tham số).
+
+---
+
+### Bài 21 — Page Navigation (Liên kết trang)
+
+> Kỹ thuật **liên kết trang**: hàm điều hướng trả về đúng Page object của trang đích, giúp test case đọc như luồng nghiệp vụ thật.
+
+| File | Nội dung |
+| :--- | :--- |
+| `pages/BasePage.java` | `clickDashboardMenu()` → trả về `DashboardPage`, `clickProjectsMenu()` → trả về `ProjectsPage`. |
+| `pages/LoginPage.java` | `loginCRM()` / `loginCRM_AdminRole()` → trả về `DashboardPage` sau khi đăng nhập thành công. |
+| `testcases/DashboardTest.java` | Test E2E viết theo chuỗi liên kết trang: `loginPage.loginCRM_AdminRole()` → `dashboardPage.clickProjectsMenu()` → `projectsPage.clickDashboardMenu()`. |
+
+**Kiến thức chính:**
+- Hàm nào **chuyển sang trang khác** thì trả về Page object của trang đích (`return new DashboardPage(driver);`).
+- Hàm nào **ở lại trang hiện tại** thì trả về `this` — nối chuỗi được (fluent).
+- Test case không cần `new` từng page object thủ công → giảm code thừa, giảm rủi ro dùng nhầm page.
+- Luồng test đọc đúng theo thao tác thật của người dùng: đăng nhập → vào menu → thao tác → quay lại.
+
+---
+
+### Bài 22 & 23 — Thực hành POM hoàn chỉnh
+
+> Bài thực hành lớn: áp dụng POM + liên kết trang + fluent chaining cho 4 module của **Perfex CRM** (Login, Dashboard, Customers, Projects, Tasks), có chia sẻ dữ liệu giữa các test case qua file JSON trung gian.
+
+**Page classes**
+
+| File | Nội dung |
+| :--- | :--- |
+| `pages/BasePage.java` | Menu điều hướng chung (`clickDashboardMenu`, `clickCustomersMenu`, `clickProjectsMenu`, `clickTasksMenu`) — mỗi hàm trả về Page object tương ứng. Kèm helper `xpathLiteral()` dùng chung để lọc dòng datatable theo tên an toàn với dấu nháy. |
+| `pages/LoginPage.java` | Đăng nhập + các hàm verify login thành công/thất bại/validation HTML5. |
+| `pages/DashboardPage.java` | Verify điều hướng và các ô thống kê nhanh trên Dashboard. |
+| `pages/CustomersPage.java` | Danh sách Customer + form **Add New Customer** (tab Customer Details, tab Billing & Shipping), tìm kiếm, và **2 cách xóa**: đi thẳng link delete, hoặc hover dòng → click Delete → confirm alert. |
+| `pages/ProjectsPage.java` | Danh sách Project + form **Add New Project** (chọn Customer bằng ô ajax-search), thống kê project theo trạng thái, và **xóa Project** bằng hover + confirm alert. |
+| `pages/TasksPage.java` | Danh sách Task + **modal Add New Task**: chọn Related To = Project rồi chọn Project bằng ô ajax-search, xử lý datepicker và modal chi tiết task mở ra sau khi lưu. |
+
+**Test classes**
+
+| File | Test case |
+| :--- | :--- |
+| `testcases/LoginTest.java` | 8 TC: login thành công, sai email/password, để trống, sai định dạng email. |
+| `testcases/DashboardTest.java` | 4 TC: Invoices Awaiting Payment, Converted Leads, Projects In Progress (E2E đối chiếu với trang Projects), Tasks Not Finished. |
+| `testcases/CustomersTest.java` | 3 TC: thêm mới Customer (verify lại toàn bộ field trên trang profile) + xóa Customer theo 2 cách. |
+| `testcases/ProjectsTest.java` | 2 TC: thêm mới Project (dùng lại Customer từ file JSON) + xóa Project. |
+| `testcases/TasksTest.java` | 1 TC: thêm mới Task và gắn vào Project vừa tạo (dùng lại Project từ file JSON). |
+
+**Kiến thức chính:**
+- **Fluent chaining:** hàm ở lại trang trả về `this` nên test case viết liền mạch:
+  ```java
+customersPage.verifyNavigateToCustomersPage()
+          .clickNewCustomerButton()
+          .fillCustomerDetails(companyName, vatNumber, phone, website)
+          .clickSaveButton()
+          .waitForCustomerProfilePage();
+  ```
+- **Liên kết trang thật:** điều hướng bằng menu (`dashboardPage.clickCustomersMenu()`) thay vì `driver.get()` để đi đúng luồng người dùng.
+- **Assertion đặt tại test class** theo mô hình AAA (Arrange – Act – Assert), page class chỉ thao tác và trả dữ liệu.
+- **Test data động, traceable:** mọi tên đều gắn timestamp (`AUTO_POM_ADD_CUSTOMER_1784971172000`) — chạy lại nhiều lần không đụng nhau, nhìn dữ liệu là biết test nào sinh ra.
+- **Xử lý các control khó của Perfex CRM (đều dùng smart wait, không `Thread.sleep`):**
+  - **Ô selectpicker ajax-search** (Customer, Project): option không có sẵn trong DOM mà nạp về sau khi gõ → phải mở dropdown, gõ thật rồi chờ option. Riêng ô Project trong modal Task cần `FluentWait` gõ lại từ khóa với chu kỳ **2 giây** vì plugin chỉ gắn handler sau khi dropdown hiện xong, và chu kỳ ngắn hơn sẽ liên tục cắt ngang debounce.
+  - **TinyMCE** ở trang Add New Project load bất đồng bộ và cướp focus → chờ `#description_ifr` hiển thị trước khi thao tác form.
+  - **Datepicker (xdsoft)** vẫn mở đè lên control bên dưới sau khi nhập → chuyển focus sang ô input khác để đóng (không dùng ESC vì ESC đóng luôn modal).
+  - **Modal + lớp phủ:** sau khi lưu Task, Perfex mở tiếp modal chi tiết → phải đóng modal và chờ `.modal-backdrop` cùng toast `.float-alert` biến mất mới thao tác được bảng bên dưới.
+  - **Datatable vẽ lại** gây `StaleElementReferenceException` khi hover để xóa → gom hover + click vào `FluentWait` có `ignoring(...)`.
+  - **Trùng ID trên DOM:** trang Add New Project có cả `div#project_cost` bọc ngoài `input#project_cost` → phải dùng `By.cssSelector("input#project_cost")`.
+
+---
+
+## 🔗 Dữ liệu trung gian giữa các test case
+
+Từ Bài 22 & 23, test data được truyền giữa các module qua file JSON trong `src/test/resources/testdata/` (đọc/ghi bằng `JsonUtils`):
+
+```
+CustomersTest.testAddNewCustomer   →  customer_data.json  { "customerName": "..." }
+                                              ↓
+ProjectsTest.testAddNewProject     →  project_data.json   { "projectName": "..." }
+                                              ↓
+TasksTest.testAddNewTaskWithProject →  Task được gắn vào đúng Project vừa tạo
+```
+
+**Cách dùng:**
+
+```java
+// Ghi lại sau khi tạo thành công
+JsonUtils.setDataToJsonFile(ConfigData.CUSTOMER_DATA_FILE, ConfigData.KEY_CUSTOMER_NAME, companyName);
+
+// Đọc ra ở test case sau
+String customerName = JsonUtils.getValueFromJsonFile(ConfigData.CUSTOMER_DATA_FILE, ConfigData.KEY_CUSTOMER_NAME);
+```
+
+> **Lưu ý thứ tự chạy:** `ProjectsTest` cần `customer_data.json` và `TasksTest` cần `project_data.json`. Chạy đúng thứ tự **Customers → Projects → Tasks** (suite `SuiteRegresionThucHanhPOM.xml` đã sắp sẵn thứ tự này). Nếu dữ liệu trong file JSON đã bị xóa khỏi CRM thì chạy lại test tạo mới tương ứng để làm mới dữ liệu.
 
 ---
 
@@ -494,26 +654,39 @@ SeleniumMaven012026/
 ### Chạy bằng Maven
 
 ```bash
-# Chạy tất cả suite XML đã cấu hình trong pom.xml
+# Chạy các suite XML đã cấu hình sẵn trong pom.xml
 mvn test
+```
 
+```bash
+# Chạy toàn bộ Bài 22 & 23 theo đúng thứ tự phụ thuộc dữ liệu
+mvn test "-DsuiteXmlFile=src/test/resources/suites/SuiteRegresionThucHanhPOM.xml"
+```
+
+```bash
 # Chạy một class cụ thể
-mvn test -Dtest=com.anhtester.Bai9_TestNG.SeleniumTestNG
-# Hoặc dùng dấu ngoặc kép (khuyên dùng trên PowerShell / Windows)
-mvn test "-Dtest=com.anhtester.Bai9_TestNG.SeleniumTestNG"
+mvn test "-Dtest=CustomersTest"
+```
 
-# Chạy với suite XML cụ thể
-mvn test -DsuiteXmlFile=src/test/resources/suites/SuiteLoginTest.xml
-# Hoặc dùng dấu ngoặc kép (khuyên dùng trên PowerShell / Windows)
-mvn test "-DsuiteXmlFile=src/test/resources/suites/SuiteLoginTest.xml"
+```bash
+# Chạy một test case cụ thể trong class
+mvn test "-Dtest=ProjectsTest#testAddNewProject"
+```
 
-# Clean và chạy test
+```bash
+# Clean và chạy lại từ đầu
 mvn clean test
 ```
+
+> **Windows / PowerShell:** nên bọc tham số `-D...` trong dấu ngoặc kép như các ví dụ trên để tránh lỗi parse tham số.
 
 ### Chạy TestNG Suite XML
 - Mở file `.xml` trong thư mục `src/test/resources/suites/`
 - Click chuột phải → **Run As TestNG Suite** (IntelliJ / Eclipse)
+
+### Kết quả test
+- Log tóm tắt: `target/surefire-reports/*.txt`
+- Báo cáo HTML của TestNG: `target/surefire-reports/index.html`
 
 ---
 

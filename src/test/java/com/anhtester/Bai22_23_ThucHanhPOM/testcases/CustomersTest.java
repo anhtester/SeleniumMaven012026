@@ -1,8 +1,8 @@
-package com.anhtester.Bai22_ThucHanhPOM.testcases;
+package com.anhtester.Bai22_23_ThucHanhPOM.testcases;
 
-import com.anhtester.Bai22_ThucHanhPOM.pages.CustomersPage;
-import com.anhtester.Bai22_ThucHanhPOM.pages.DashboardPage;
-import com.anhtester.Bai22_ThucHanhPOM.pages.LoginPage;
+import com.anhtester.Bai22_23_ThucHanhPOM.pages.CustomersPage;
+import com.anhtester.Bai22_23_ThucHanhPOM.pages.DashboardPage;
+import com.anhtester.Bai22_23_ThucHanhPOM.pages.LoginPage;
 import com.anhtester.common.BaseTest;
 import com.anhtester.constants.ConfigData;
 import com.anhtester.utils.JsonUtils;
