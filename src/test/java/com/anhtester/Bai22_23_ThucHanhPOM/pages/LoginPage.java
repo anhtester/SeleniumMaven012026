@@ -1,7 +1,7 @@
 package com.anhtester.Bai22_23_ThucHanhPOM.pages;
 
 import com.anhtester.constants.ConfigData;
-import com.anhtester.keywords.WebUI;
+import com.anhtester.keywords.ActionKeyword;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -38,7 +38,7 @@ public class LoginPage extends BasePage {
    }
 
    public void verifyNavigateToTheLoginPage() {
-      WebUI.waitForPageLoaded(driver);
+      ActionKeyword.waitForPageLoaded(driver);
       //Title, URL, Header
       SoftAssert softAssert = new SoftAssert();
       System.out.println("Login page title: " + driver.getTitle());
@@ -70,14 +70,14 @@ public class LoginPage extends BasePage {
    }
 
    public void verifyLoginSuccess() {
-      WebUI.waitForPageLoaded(driver);
+      ActionKeyword.waitForPageLoaded(driver);
       wait.until(ExpectedConditions.urlContains("/admin/"));
       Assert.assertTrue(driver.getCurrentUrl().contains("/admin/"), "FAIL. Không chuyển hướng sang trang Dashboard");
       Assert.assertFalse(driver.getCurrentUrl().contains("authentication"), "FAIL. Vẫn đang ở trang Login");
    }
 
    public void verifyLoginFail(String message) {
-      WebUI.waitForPageLoaded(driver);
+      ActionKeyword.waitForPageLoaded(driver);
       wait.until(ExpectedConditions.visibilityOfElementLocated(errorMessage));
       Assert.assertTrue(driver.findElement(errorMessage).isDisplayed(), "Error message NOT displays");
       Assert.assertEquals(driver.findElement(errorMessage).getText(), message, "Content of error massage NOT match.");
@@ -85,10 +85,10 @@ public class LoginPage extends BasePage {
    }
 
    public void verifyLoginFailWithEmailAndPasswordNull() {
-      boolean checkEmailErrorMessage = WebUI.isElementPresent(driver, alertEmailRequiredMessage, 5);
+      boolean checkEmailErrorMessage = ActionKeyword.isElementPresent(driver, alertEmailRequiredMessage, 5);
       Assert.assertTrue(checkEmailErrorMessage, "Fail. The Email Error Message is not present");
 
-      boolean checkPasswordErrorMessage = WebUI.isElementPresent(driver, alertPasswordRequiredMessage, 5);
+      boolean checkPasswordErrorMessage = ActionKeyword.isElementPresent(driver, alertPasswordRequiredMessage, 5);
       Assert.assertTrue(checkPasswordErrorMessage, "Fail. The Password Error Message is not present");
 
       Assert.assertEquals(driver.getCurrentUrl(), "https://crm.anhtester.com/admin/authentication", "The Current LOGIN_URL is not correct");

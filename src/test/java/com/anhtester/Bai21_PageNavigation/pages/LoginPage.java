@@ -1,7 +1,7 @@
 package com.anhtester.Bai21_PageNavigation.pages;
 
 import com.anhtester.constants.ConfigData;
-import com.anhtester.keywords.WebUI;
+import com.anhtester.keywords.ActionKeyword;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -64,10 +64,10 @@ public class LoginPage extends BasePage {
    }
 
    public void verifyLoginFailWithEmailAndPasswordNull(){
-      boolean checkEmailErrorMessage = WebUI.isElementPresent(driver, alertEmailRequiredMessage, 5);
+      boolean checkEmailErrorMessage = ActionKeyword.isElementPresent(driver, alertEmailRequiredMessage, 5);
       Assert.assertTrue(checkEmailErrorMessage, "Fail. The Email Error Message is not present");
 
-      boolean checkPasswordErrorMessage = WebUI.isElementPresent(driver, alertPasswordRequiredMessage, 5);
+      boolean checkPasswordErrorMessage = ActionKeyword.isElementPresent(driver, alertPasswordRequiredMessage, 5);
       Assert.assertTrue(checkPasswordErrorMessage, "Fail. The Password Error Message is not present");
 
       Assert.assertEquals(driver.getCurrentUrl(), "https://crm.anhtester.com/admin/authentication", "The Current LOGIN_URL is not correct");

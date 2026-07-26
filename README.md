@@ -28,6 +28,7 @@
   - [Bài 20 — Page Factory](#bài-20--page-factory)
   - [Bài 21 — Page Navigation (Liên kết trang)](#bài-21--page-navigation-liên-kết-trang)
   - [Bài 22 & 23 — Thực hành POM hoàn chỉnh](#bài-22--23--thực-hành-pom-hoàn-chỉnh)
+  - [Bài 24 — Viết hàm chung với class WebUI](#bài-24--viết-hàm-chung-với-class-webui)
 - [Dữ liệu trung gian giữa các test case](#-dữ-liệu-trung-gian-giữa-các-test-case)
 - [Cách chạy test](#-cách-chạy-test)
 - [Giấy phép](#-giấy-phép)
@@ -96,7 +97,8 @@ SeleniumMaven012026/
 │   │   ├── constants/
 │   │   │   └── ConfigData.java     # Hằng số dùng chung (URL, tài khoản, tên file JSON test data)
 │   │   ├── keywords/
-│   │   │   └── WebUI.java          # Lớp keyword dùng chung (setText, clickElement, isElementPresent...)
+│   │   │   ├── ActionKeyword.java  # Lớp keyword đời đầu — nhận WebDriver ở từng hàm (dùng từ Bài 15 → 23)
+│   │   │   └── WebUI.java          # Lớp keyword dùng chung của Bài 24 — giữ driver static, có smart wait + retry
 │   │   └── utils/
 │   │       ├── CaptureUtils.java       # Chụp màn hình bằng Robot class
 │   │       ├── ColorUtils.java         # Lấy mã màu HEX của pixel trên màn hình
@@ -206,16 +208,31 @@ SeleniumMaven012026/
 │       │   │       ├── LoginTest.java
 │       │   │       └── DashboardTest.java
 │       │   │
-│       │   └── Bai22_23_ThucHanhPOM/        # 📌 Bài 22 & 23: Thực hành POM hoàn chỉnh
-│       │       ├── pages/
-│       │       │   ├── BasePage.java        # Menu + helper xpathLiteral dùng chung
+│       │   ├── Bai22_23_ThucHanhPOM/        # 📌 Bài 22 & 23: Thực hành POM hoàn chỉnh
+│       │   │   ├── pages/
+│       │   │   │   ├── BasePage.java        # Menu + helper xpathLiteral dùng chung
+│       │   │   │   ├── LoginPage.java
+│       │   │   │   ├── DashboardPage.java
+│       │   │   │   ├── CustomersPage.java   # Danh sách + form Add New Customer
+│       │   │   │   ├── ProjectsPage.java    # Danh sách + form Add/Delete Project
+│       │   │   │   └── TasksPage.java       # Danh sách + modal Add New Task
+│       │   │   └── testcases/
+│       │   │       ├── LoginTest.java       # 8 TC Login
+│       │   │       ├── DashboardTest.java   # 4 TC thống kê Dashboard
+│       │   │       ├── CustomersTest.java   # 3 TC: thêm mới + 2 cách xóa Customer
+│       │   │       ├── ProjectsTest.java    # 2 TC: thêm mới + xóa Project
+│       │   │       └── TasksTest.java       # 1 TC: thêm Task gắn với Project
+│       │   │
+│       │   └── Bai24_VietHamChung_WebUI/    # 📌 Bài 24: Viết hàm chung với class WebUI
+│       │       ├── pages/                   # Cùng 6 page như Bài 22 & 23 nhưng gọi keyword WebUI
+│       │       │   ├── BasePage.java        # Menu + xpathLiteral + truyền driver cho WebUI
 │       │       │   ├── LoginPage.java
 │       │       │   ├── DashboardPage.java
-│       │       │   ├── CustomersPage.java   # Danh sách + form Add New Customer
-│       │       │   ├── ProjectsPage.java    # Danh sách + form Add/Delete Project
-│       │       │   └── TasksPage.java       # Danh sách + modal Add New Task
+│       │       │   ├── CustomersPage.java
+│       │       │   ├── ProjectsPage.java
+│       │       │   └── TasksPage.java
 │       │       └── testcases/
-│       │           ├── LoginTest.java       # 8 TC Login
+│       │           ├── LoginTest.java       # 9 TC: 8 TC Login + 1 TC mẫu viết theo AAA
 │       │           ├── DashboardTest.java   # 4 TC thống kê Dashboard
 │       │           ├── CustomersTest.java   # 3 TC: thêm mới + 2 cách xóa Customer
 │       │           ├── ProjectsTest.java    # 2 TC: thêm mới + xóa Project
@@ -227,7 +244,8 @@ SeleniumMaven012026/
 │           │   ├── SuiteCustomerTest.xml
 │           │   ├── SuiteAnnotations.xml
 │           │   ├── SuiteLoginTest_Annotation.xml
-│           │   └── SuiteRegresionThucHanhPOM.xml   # Chạy toàn bộ Bài 22 & 23
+│           │   ├── SuiteRegresionThucHanhPOM.xml   # Chạy toàn bộ Bài 22 & 23
+│           │   └── SuiteRegresion.xml              # Chạy toàn bộ Bài 24
 │           │
 │           └── testdata/                    # File JSON trung gian (tự sinh khi chạy test)
 │               ├── customer_data.json
@@ -476,14 +494,14 @@ SeleniumMaven012026/
 | File | Nội dung |
 | :--- | :--- |
 | `DemoImplicitWait.java` | `Implicit Wait` — đặt thời gian chờ chung qua `driver.manage().timeouts().implicitlyWait(...)`, áp dụng cho mọi lần tìm element. |
-| `DemoExplicitWait.java` | `Explicit Wait` — `WebDriverWait` + `ExpectedConditions` (`visibilityOfElementLocated`, `elementToBeClickable`, `presenceOfElementLocated`), đã được đóng gói sẵn trong các hàm của `WebUI`. |
+| `DemoExplicitWait.java` | `Explicit Wait` — `WebDriverWait` + `ExpectedConditions` (`visibilityOfElementLocated`, `elementToBeClickable`, `presenceOfElementLocated`), đã được đóng gói sẵn trong các hàm của `ActionKeyword`. |
 
 **Kiến thức chính:**
 - **Implicit Wait:** áp dụng toàn cục, đặt 1 lần; muốn tắt thì set về `Duration.ofSeconds(0)`.
 - **Explicit Wait:** chờ có điều kiện cho từng element cụ thể — linh hoạt và được khuyến nghị.
   - `ExpectedConditions` thường dùng: `visibilityOfElementLocated`, `elementToBeClickable`, `presenceOfElementLocated`, `urlMatches`.
 - **Lưu ý:** không nên trộn Implicit và Explicit Wait vì có thể gây thời gian chờ khó lường.
-- Lớp `WebUI` đã tích hợp Explicit Wait vào các keyword (`setText`, `clickElement`, `isElementPresent`) để code test gọn hơn.
+- Lớp `ActionKeyword` đã tích hợp Explicit Wait vào các keyword (`setText`, `clickElement`, `isElementPresent`) để code test gọn hơn.
 
 ---
 
@@ -497,7 +515,7 @@ SeleniumMaven012026/
 | `ThucHanhCustomerCRM.java` | Test **thêm mới Customer**: `@BeforeMethod` tự login, điền đầy đủ form, chọn dropdown selectpicker bằng JavascriptExecutor (kể cả field **Group** dạng multi-select `groups_in[]`), Save và **verify lại toàn bộ field** trên trang profile. |
 
 **Kiến thức chính:**
-- **Tổ chức code:** tách locator ra `LocatorsCRM` (mô hình hướng Page Object), tái sử dụng keyword `WebUI`, kế thừa `BaseTest`.
+- **Tổ chức code:** tách locator ra `LocatorsCRM` (mô hình hướng Page Object), tái sử dụng keyword `ActionKeyword`, kế thừa `BaseTest`.
 - **Test với `priority`:** sắp xếp thứ tự chạy các test case.
 - **Assertions đa dạng:** kiểm tra theo text, URL (`getCurrentUrl`), tiêu đề (`getTitle`), trạng thái boolean.
 - **Validation HTML5:** đọc thông báo lỗi mặc định của trình duyệt qua thuộc tính `validationMessage` (không lấy được bằng `getText()`).
@@ -620,9 +638,86 @@ SeleniumMaven012026/
 
 ---
 
+### Bài 24 — Viết hàm chung với class WebUI
+
+> Lấy lại toàn bộ 6 page + 5 test class của Bài 22 & 23, nhưng thay mọi thao tác Selenium lặp đi lặp lại bằng **keyword dùng chung trong class `WebUI`**. Mục tiêu: page class chỉ còn lo locator và nghiệp vụ, mọi kỹ thuật chống test "lúc chạy lúc không" (flaky) gom hết về một chỗ.
+
+**Từ `ActionKeyword` sang `WebUI`**
+
+| | `ActionKeyword` (Bài 15 → 23) | `WebUI` (Bài 24) |
+| :--- | :--- | :--- |
+| Cách giữ driver | Truyền `WebDriver` vào **từng lời gọi** | Giữ `driver` ở biến `static`, gán 1 lần qua `new WebUI(driver)` |
+| Cách gọi | `ActionKeyword.clickElement(driver, by)` | `WebUI.clickElement(by)` |
+| Chống stale | Không có | Mọi keyword đều bọc `retryUntil` |
+
+`BasePage` là nơi truyền driver vào `WebUI` — vì mọi page đều kế thừa `BasePage` nên driver luôn sẵn sàng trước khi bất kỳ keyword nào chạy:
+
+```java
+public BasePage(WebDriver driver) {
+   this.driver = driver;
+   wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+   //Truyền driver vào class WebUI để các hàm static của WebUI dùng chung driver này
+   new WebUI(driver);
+}
+```
+
+**Các nhóm keyword trong `WebUI`**
+
+| Nhóm | Hàm | Ghi chú |
+| :--- | :--- | :--- |
+| **Retry** | `retryWait()`, `retryUntil(condition)` | Vòng chờ bỏ qua lỗi nhất thời, dùng cho DOM tự vẽ lại |
+| **Search ajax** | `searchSelectPickerOption(buttonDropdown, searchBox, option, keyword, maxRetries)` | Gõ lại từ khóa nhiều lần khi danh sách chưa nạp về kịp |
+| **Wait** | `waitForElementVisible`, `waitForElementPresent`, `waitForElementClickable`, `waitForPageLoaded`, `waitForJQueryLoad`, `waitForAngularLoad` | Có overload nhận `timeOut` riêng |
+| **Element** | `getWebElement`, `getWebElements`, `checkElementExist`, `scrollToElement` | `checkElementExist` có bản dùng `FluentWait` với số lần thử |
+| **Hành động** | `openURL`, `clickElement`, `setText` | Đều chờ element sẵn sàng rồi mới thao tác |
+| **Lấy dữ liệu** | `getElementText`, `getElementAttribute`, `getElementCssValue` | |
+| **Tiện ích** | `sleep`, `logConsole` | |
+
+**Kiến thức chính:**
+
+- **`StaleElementReferenceException` — hiểu đúng bản chất:** `findElement()` **không** trả về node DOM mà trả về một *id tham chiếu*. Trình duyệt vẽ lại node là id đó chết, và Selenium **không bao giờ tự tìm lại**. Vì vậy quy tắc vàng là **tìm lại element bên trong vòng chờ**, không giữ sẵn `WebElement` từ bên ngoài:
+
+  ```java
+  //SAI — element tìm xong có thể chết trước khi kịp dùng
+  WebElement row = wait.until(ExpectedConditions.visibilityOfElementLocated(rowLink));
+  new Actions(driver).moveToElement(row).perform();
+
+  //ĐÚNG — tìm lại ở mỗi vòng, hỏng thì thử lại
+  WebUI.retryUntil(driver -> {
+     new Actions(driver).moveToElement(driver.findElement(rowLink)).perform();
+     driver.findElement(deleteLink).click();
+     return true;
+  });
+  ```
+
+- **`retryUntil` bỏ qua 4 exception**, đều thuộc loại "chưa sẵn sàng ngay lúc này" chứ không phải sai locator:
+  `NoSuchElementException`, `StaleElementReferenceException`, `ElementClickInterceptedException`, `ElementNotInteractableException`.
+
+- **Retry không phải lúc nào cũng an toàn** — phải xét tính lặp lại được (idempotent):
+  - *Đọc* (`getElementText`, `getElementAttribute`) — lặp bao nhiêu lần cũng vô hại.
+  - *Click* — an toàn, vì 4 exception trên đều chứng minh cú click **chưa hề được gửi đi**; click thành công thì hàm thoát ngay.
+  - *Nhập liệu* — **bắt buộc `clear()` trước khi gõ**, nếu không lần thử lại sẽ nối thêm vào phần chữ đã gõ dở, cho ra chuỗi kiểu `"helhello"`.
+
+- **Bẫy `null` với `FluentWait`:** vòng chờ hiểu `null` là "chưa xong". `getAttribute()` trả `null` khi element không có attribute đó → phải bọc `Optional` nếu không sẽ chờ tới hết giờ rồi ném `TimeoutException`.
+
+- **`ExpectedConditions.elementToBeClickable`: truyền `By`, đừng truyền `WebElement`.** Bản nhận `By` tìm lại element ở **mỗi vòng poll**; bản nhận `WebElement` giữ mãi node cũ, node bị thay mới là chờ vô ích tới hết giờ.
+
+- **Datatable ajax — chờ đúng 3 mốc mới thao tác được:** mỗi ký tự gõ vào ô search bắn một request và **vẽ lại toàn bộ `tbody`**. Chỉ chờ "bảng đã có chữ cần tìm" là chưa đủ vì request của các ký tự cuối còn đang bay:
+  1. Bảng đã lọc xong (text chứa từ khóa hoặc *No matching records found*)
+  2. Lớp phủ `#<table>_processing` đã tắt
+  3. `WebUI.waitForJQueryLoad()` — hết ajax đang treo (`jQuery.active == 0`)
+
+  > Thứ tự quan trọng: **không** gọi `waitForJQueryLoad()` ngay sau `sendKeys`, vì plugin có debounce nên lúc đó request chưa bắn đi, `jQuery.active` vẫn bằng 0 và hàm chờ trả về ngay lập tức.
+
+- **Ô selectpicker ajax hay bị hụt danh sách:** plugin chỉ gắn handler ajax sau khi dropdown mở xong, gõ sớm hơn là không có request nào được gửi. `searchSelectPickerOption` xử lý bằng cách: mở lại dropdown nếu nó đã đóng → `clear()` rồi gõ lại từ đầu → chờ option → chưa thấy thì lặp lại, tối đa `maxRetries` lần rồi mới báo fail kèm log từng lần thử.
+
+- **Link chỉ hiện khi hover:** cụm `View | Copy | Edit | Delete` của datatable để `display:none`, click vào lúc chưa hover sẽ nhận `ElementNotInteractableException` (element **có** trong DOM nhưng chưa thao tác được — khác hẳn stale). Cách xử lý: cuộn dòng vào giữa màn hình (`scrollToElement`) → hover → **kiểm tra link đã hiện chưa**, chưa thì trả `false` để hover lại ở vòng sau.
+
+---
+
 ## 🔗 Dữ liệu trung gian giữa các test case
 
-Từ Bài 22 & 23, test data được truyền giữa các module qua file JSON trong `src/test/resources/testdata/` (đọc/ghi bằng `JsonUtils`):
+Từ Bài 22 & 23 (và Bài 24 dùng lại y nguyên), test data được truyền giữa các module qua file JSON trong `src/test/resources/testdata/` (đọc/ghi bằng `JsonUtils`):
 
 ```
 CustomersTest.testAddNewCustomer   →  customer_data.json  { "customerName": "..." }
@@ -642,7 +737,7 @@ JsonUtils.setDataToJsonFile(ConfigData.CUSTOMER_DATA_FILE, ConfigData.KEY_CUSTOM
 String customerName = JsonUtils.getValueFromJsonFile(ConfigData.CUSTOMER_DATA_FILE, ConfigData.KEY_CUSTOMER_NAME);
 ```
 
-> **Lưu ý thứ tự chạy:** `ProjectsTest` cần `customer_data.json` và `TasksTest` cần `project_data.json`. Chạy đúng thứ tự **Customers → Projects → Tasks** (suite `SuiteRegresionThucHanhPOM.xml` đã sắp sẵn thứ tự này). Nếu dữ liệu trong file JSON đã bị xóa khỏi CRM thì chạy lại test tạo mới tương ứng để làm mới dữ liệu.
+> **Lưu ý thứ tự chạy:** `ProjectsTest` cần `customer_data.json` và `TasksTest` cần `project_data.json`. Chạy đúng thứ tự **Customers → Projects → Tasks** — suite `SuiteRegresionThucHanhPOM.xml` (Bài 22 & 23) và `SuiteRegresion.xml` (Bài 24) đều đã sắp sẵn thứ tự này. Nếu dữ liệu trong file JSON đã bị xóa khỏi CRM thì chạy lại test tạo mới tương ứng để làm mới dữ liệu.
 
 ---
 
@@ -664,6 +759,11 @@ mvn test "-DsuiteXmlFile=src/test/resources/suites/SuiteRegresionThucHanhPOM.xml
 ```
 
 ```bash
+# Chạy toàn bộ Bài 24 theo đúng thứ tự phụ thuộc dữ liệu
+mvn test "-DsuiteXmlFile=src/test/resources/suites/SuiteRegresion.xml"
+```
+
+```bash
 # Chạy một class cụ thể
 mvn test "-Dtest=CustomersTest"
 ```
@@ -672,6 +772,12 @@ mvn test "-Dtest=CustomersTest"
 # Chạy một test case cụ thể trong class
 mvn test "-Dtest=ProjectsTest#testAddNewProject"
 ```
+
+> **Lưu ý:** từ Bài 24 trở đi có **2 class trùng tên** ở 2 package khác nhau (`Bai22_23_ThucHanhPOM` và `Bai24_VietHamChung_WebUI`). Muốn chạy đúng một class thì ghi đầy đủ package:
+>
+> ```bash
+> mvn test "-Dtest=com.anhtester.Bai24_VietHamChung_WebUI.testcases.ProjectsTest#testAddNewProject"
+> ```
 
 ```bash
 # Clean và chạy lại từ đầu

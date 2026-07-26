@@ -1,7 +1,7 @@
-package com.anhtester.Bai22_23_ThucHanhPOM.pages;
+package com.anhtester.Bai24_VietHamChung_WebUI.pages;
 
 import com.anhtester.constants.ConfigData;
-import com.anhtester.keywords.ActionKeyword;
+import com.anhtester.keywords.WebUI;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -25,33 +25,29 @@ public class DashboardPage extends BasePage {
       super(driver);
       this.driver = driver;
       wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-   }
-
-   public boolean isDashboardPageOpen() {
-      ActionKeyword.waitForPageLoaded(driver);
-      return driver.findElement(menuDashboard).isDisplayed();
+      new WebUI(driver);
    }
 
    public void verifyNavigateToDashboardPage() {
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.visibilityOfElementLocated(menuDashboard));
       Assert.assertEquals(driver.getCurrentUrl(), ConfigData.BASE_URL + dashboardPageUrl, "The dashboard page URL not match.");
    }
 
    public void verifyTotalInvoicesAwaitingPayment(String expectedValue) {
-      ActionKeyword.waitForPageLoaded(driver);
-      Assert.assertTrue(ActionKeyword.isElementPresent(driver, totalInvoicesAwaitingPayment), "The section Invoices Awaiting Payment not display.");
+      WebUI.waitForPageLoaded();
+      Assert.assertTrue(WebUI.checkElementExist(totalInvoicesAwaitingPayment), "The section Invoices Awaiting Payment not display.");
       Assert.assertEquals(driver.findElement(totalInvoicesAwaitingPayment).getText(), expectedValue, "FAIL!! Invoices Awaiting Payment total not match.");
    }
 
    public void verifyTotalConvertedLeads(String expectedValue) {
-      ActionKeyword.waitForPageLoaded(driver);
-      Assert.assertTrue(ActionKeyword.isElementPresent(driver, totalConvertedLeads), "The section Converted Leads not display.");
+      WebUI.waitForPageLoaded();
+      Assert.assertTrue(WebUI.checkElementExist(totalConvertedLeads), "The section Converted Leads not display.");
       Assert.assertEquals(driver.findElement(totalConvertedLeads).getText(), expectedValue, "FAIL!! Converted Leads total not match.");
    }
 
    public void verifyTotalProjectsInProgress(int projectsInProgress, int projectsTotal) {
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.visibilityOfElementLocated(totalProjectsInProgress));
       String text = driver.findElement(totalProjectsInProgress).getText();
       System.out.println("Total Projects In Progress: " + text);
@@ -59,8 +55,8 @@ public class DashboardPage extends BasePage {
    }
 
    public void verifyTotalTasksNotFinished(String expectedValue) {
-      ActionKeyword.waitForPageLoaded(driver);
-      Assert.assertTrue(ActionKeyword.isElementPresent(driver, totalTasksNotFinished), "The section Tasks Not Finished not display.");
+      WebUI.waitForPageLoaded();
+      Assert.assertTrue(WebUI.checkElementExist(totalTasksNotFinished), "The section Tasks Not Finished not display.");
       Assert.assertEquals(driver.findElement(totalTasksNotFinished).getText(), expectedValue, "FAIL!! Tasks Not Finished total not match.");
    }
 

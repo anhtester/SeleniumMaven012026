@@ -1,26 +1,21 @@
-package com.anhtester.Bai22_23_ThucHanhPOM.pages;
+package com.anhtester.Bai24_VietHamChung_WebUI.pages;
 
 import com.anhtester.constants.ConfigData;
-import com.anhtester.keywords.ActionKeyword;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.ElementClickInterceptedException;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
+import com.anhtester.keywords.WebUI;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 
 import java.time.Duration;
 
 public class ProjectsPage extends BasePage {
+   //Số lần được phép gõ lại từ khoá vào ô search ajax khi danh sách chưa nạp về kịp
+   private static final int SEARCH_MAX_RETRIES = 3;
+
    private WebDriver driver;
    private WebDriverWait wait;
-   private Wait<WebDriver> retryWait;
 
    private String projectsPageUrl = "/admin/projects";
    private String addNewProjectPageUrl = "/admin/projects/project";
@@ -35,6 +30,8 @@ public class ProjectsPage extends BasePage {
    private By tableProjects = By.cssSelector("table#projects");
    private By tableProjectsBody = By.cssSelector("#projects tbody");
    private By inputSearchProject = By.cssSelector("#projects_filter input[type='search']");
+   //Lớp phủ "Processing..." của Datatable, hiện lên trong lúc bảng đang chờ dữ liệu ajax về
+   private By tableProjectsProcessing = By.cssSelector("#projects_processing");
    private By buttonNewProject = By.xpath("//a[contains(@href,'/admin/projects/project') and contains(normalize-space(),'New Project')]");
 
    //Form Add New Project
@@ -64,17 +61,12 @@ public class ProjectsPage extends BasePage {
       super(driver);
       this.driver = driver;
       wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-      retryWait = new FluentWait<>(driver)
-              .withTimeout(Duration.ofSeconds(15))
-              .pollingEvery(Duration.ofMillis(500))
-              .ignoring(NoSuchElementException.class)
-              .ignoring(StaleElementReferenceException.class)
-              .ignoring(ElementClickInterceptedException.class);
+      new WebUI(driver);
    }
 
    public ProjectsPage openProjectsPage() {
       driver.get(ConfigData.BASE_URL + projectsPageUrl);
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.visibilityOfElementLocated(headerProjectsPage));
 
       return this;
@@ -104,7 +96,7 @@ public class ProjectsPage extends BasePage {
    }
 
    private void waitForAddNewProjectFormLoaded() {
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.visibilityOfElementLocated(inputProjectName));
       //Chờ TinyMCE khởi tạo xong, tránh việc editor cướp focus làm đóng dropdown đang mở
       wait.until(ExpectedConditions.visibilityOfElementLocated(iframeDescriptionEditor));
@@ -119,18 +111,15 @@ public class ProjectsPage extends BasePage {
    /**
     * Customer là selectpicker dạng ajax-search: option chỉ được nạp về sau khi gõ từ khoá.
     * Vì vậy phải gõ thật vào ô search rồi chọn option trong dropdown, không set value trực tiếp được.
+    * Danh sách hay bị hụt ở lần gõ đầu nên cho phép gõ lại tối đa SEARCH_MAX_RETRIES lần.
     */
    public ProjectsPage selectCustomer(String customerName) {
-      wait.until(ExpectedConditions.elementToBeClickable(buttonCustomerDropdown));
-      driver.findElement(buttonCustomerDropdown).click();
-
-      wait.until(ExpectedConditions.visibilityOfElementLocated(inputCustomerSearch));
-      driver.findElement(inputCustomerSearch).clear();
-      driver.findElement(inputCustomerSearch).sendKeys(customerName);
-
       By optionCustomer = getSelectPickerOption("clientid", customerName);
-      wait.until(ExpectedConditions.elementToBeClickable(optionCustomer));
-      driver.findElement(optionCustomer).click();
+      WebUI.searchSelectPickerOption(buttonCustomerDropdown, inputCustomerSearch, optionCustomer, customerName, SEARCH_MAX_RETRIES);
+      WebUI.retryUntil(driver -> {
+         driver.findElement(optionCustomer).click();
+         return true;
+      });
 
       wait.until(ExpectedConditions.attributeToBe(buttonCustomerDropdown, "title", customerName));
 
@@ -175,46 +164,56 @@ public class ProjectsPage extends BasePage {
    }
 
    public ProjectsPage clickSaveButton() {
-      ActionKeyword.clickElement(driver, buttonSave);
+      WebUI.clickElement(buttonSave);
 
       return this;
    }
 
    public ProjectsPage waitForProjectViewPage() {
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.urlMatches(".*/admin/projects/view/\\d+$"));
       wait.until(ExpectedConditions.visibilityOfElementLocated(overviewCustomer));
 
       return this;
    }
 
+   /**
+    * Datatable của Perfex lọc bằng ajax: mỗi ký tự gõ vào ô search bắn một request
+    * và mỗi response về sẽ vẽ lại toàn bộ tbody, xoá sạch node cũ.
+    * Nếu chỉ chờ "bảng đã có chữ cần tìm" thì vẫn còn request của các ký tự cuối đang bay,
+    * lần vẽ kế tiếp sẽ làm mọi element tìm được sau đó bị stale.
+    * Vì vậy phải chờ đủ 3 mốc: bảng đã lọc xong, lớp phủ Processing đã tắt, và hết ajax đang treo.
+    */
    public ProjectsPage searchProject(String keyword) {
       wait.until(ExpectedConditions.visibilityOfElementLocated(inputSearchProject));
       driver.findElement(inputSearchProject).clear();
       driver.findElement(inputSearchProject).sendKeys(keyword);
       if (!keyword.isEmpty()) {
-         wait.until(driver -> {
-            String tableText = this.driver.findElement(tableProjectsBody).getText();
+         //Dùng WebUI.retryUntil vì getText() cũng có thể dính stale khi tbody đang được vẽ lại
+         WebUI.retryUntil(driver -> {
+            String tableText = driver.findElement(tableProjectsBody).getText();
             return tableText.contains(keyword) || tableText.contains("No matching records found");
          });
       }
+      wait.until(ExpectedConditions.invisibilityOfElementLocated(tableProjectsProcessing));
+      WebUI.waitForJQueryLoad();
 
       return this;
    }
 
    public boolean isProjectsTableDisplayed() {
-      ActionKeyword.waitForPageLoaded(driver);
-      return ActionKeyword.isElementPresent(driver, tableProjects, 10);
+      WebUI.waitForPageLoaded();
+      return WebUI.checkElementExist(tableProjects, 10, 1000);
    }
 
    public boolean isProjectDisplayed(String projectName) {
       searchProject(projectName);
-      return wait.until(driver -> this.driver.findElement(tableProjectsBody).getText().contains(projectName));
+      return WebUI.retryUntil(driver -> driver.findElement(tableProjectsBody).getText().contains(projectName));
    }
 
    public boolean isProjectNotDisplayed(String projectName) {
       searchProject(projectName);
-      return wait.until(driver -> !this.driver.findElement(tableProjectsBody).getText().contains(projectName));
+      return WebUI.retryUntil(driver -> !driver.findElement(tableProjectsBody).getText().contains(projectName));
    }
 
    /**
@@ -229,9 +228,18 @@ public class ProjectsPage extends BasePage {
 
       //Datatable có thể vẽ lại ngay sau khi lọc làm element cũ bị stale,
       //nên gom hover + bấm Delete vào một vòng chờ có thể thử lại.
-      retryWait.until(driver -> {
-         new Actions(driver).moveToElement(driver.findElement(projectNameLink)).perform();
-         driver.findElement(deleteProjectLink).click();
+      WebUI.retryUntil(driver -> {
+         WebElement projectNameElement = driver.findElement(projectNameLink);
+         //Cuộn dòng vào giữa màn hình rồi mới hover, chuột không di tới element ngoài viewport được
+         WebUI.scrollToElement(projectNameElement);
+         new Actions(driver).moveToElement(projectNameElement).perform();
+
+         //Hover có thể chưa kịp ăn, link Delete vẫn đang ẩn thì trả false để hover lại ở vòng sau
+         WebElement deleteLink = driver.findElement(deleteProjectLink);
+         if (!deleteLink.isDisplayed()) {
+            return false;
+         }
+         deleteLink.click();
          return true;
       });
 
@@ -240,7 +248,7 @@ public class ProjectsPage extends BasePage {
       confirmAlert.accept();
 
       //Sau khi xóa, trang Projects được load lại từ đầu
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.visibilityOfElementLocated(headerProjectsPage));
 
       return this;

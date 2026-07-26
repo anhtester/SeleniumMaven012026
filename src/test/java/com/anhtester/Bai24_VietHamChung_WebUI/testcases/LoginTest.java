@@ -1,43 +1,64 @@
-package com.anhtester.Bai21_PageNavigation.testcases;
+package com.anhtester.Bai24_VietHamChung_WebUI.testcases;
 
-import com.anhtester.Bai21_PageNavigation.pages.LoginPage;
+import com.anhtester.Bai24_VietHamChung_WebUI.pages.DashboardPage;
+import com.anhtester.Bai24_VietHamChung_WebUI.pages.LoginPage;
 import com.anhtester.common.BaseTest;
+import com.anhtester.constants.ConfigData;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.testng.asserts.SoftAssert;
 
 public class LoginTest extends BaseTest {
 
    private LoginPage loginPage;
+   private DashboardPage dashboardPage;
+   private SoftAssert softAssert;
 
-//   @Test(priority = 1)
-//   public void testLoginCRM_Success(){
-//      driver.get("https://crm.anhtester.com/admin/authentication");
-//      ActionKeyword.setText(driver, LocatorsCRM.inputEmail, "admin@example.com", 10);
-//      ActionKeyword.setText(driver, LocatorsCRM.inputPassword, "123456");
-//      ActionKeyword.clickElement(driver, By.xpath("//button[normalize-space()='Login']"));
-//
-//      boolean checkDashboardMenu = ActionKeyword.isElementPresent(driver, LocatorsCRM.menuDashboard, 5);
-//      Assert.assertTrue(checkDashboardMenu, "Login Fail. Dashboard Menu is not present");
-//   }
+   @BeforeClass
+   public void beforeClass(){
+      softAssert  = new SoftAssert();
+   }
+
+   @AfterClass
+   public void afterClass(){
+      softAssert.assertAll();
+   }
+
+   @BeforeMethod
+   public void beforeMethod(){
+      loginPage = new LoginPage(driver);
+   }
+
+   @Test
+   public void testPatternAAA(){
+      driver.get(ConfigData.LOGIN_URL);
+      String email = "admin@example.com";
+      String password = "123456";
+
+      softAssert.assertEquals(driver.getCurrentUrl(), ConfigData.LOGIN_URL, "Fail. Login page URL is incorrect.");
+      softAssert.assertEquals(loginPage.getHeaderLoginPage(), loginPage.LOGIN_PAGE_HEADER_TEXT, "Fail. The Login page header text is not match.");
+
+      dashboardPage = loginPage.loginCRM(email, password);
+      dashboardPage.verifyNavigateToDashboardPage();
+   }
 
    @Test(priority = 1)
    public void testLoginCRM_Success() {
-      loginPage = new LoginPage(driver);
-      loginPage.loginCRM("admin@example.com", "123456");
-
+      dashboardPage = loginPage.loginCRM("admin@example.com", "123456");
       loginPage.verifyLoginSuccess();
    }
 
    @Test(priority = 2)
    public void testLoginFailWithEmailInvalid() {
-      loginPage = new LoginPage(driver);
-      loginPage.loginCRM("admin123@example.com", "123456");
-
+      dashboardPage = loginPage.loginCRM("admin123@example.com", "123456");
       loginPage.verifyLoginFail("Invalid email or password");
    }
 
    @Test(priority = 3)
    public void testLoginFailWithPasswordInvalid() {
-      loginPage = new LoginPage(driver);
       loginPage.loginCRM("admin@example.com", "123");
 
       loginPage.verifyLoginFail("Invalid email or password");
@@ -45,7 +66,6 @@ public class LoginTest extends BaseTest {
 
    @Test(priority = 4)
    public void testLoginFailWithEmailNull() {
-      loginPage = new LoginPage(driver);
       loginPage.loginCRM("", "123456");
 
       loginPage.verifyLoginFail("The Email Address field is required.");
@@ -53,7 +73,6 @@ public class LoginTest extends BaseTest {
 
    @Test(priority = 5)
    public void testLoginFailWithPasswordNull() {
-      loginPage = new LoginPage(driver);
       loginPage.loginCRM("admin@example.com", "");
 
       loginPage.verifyLoginFail("The Password field is required.");
@@ -61,7 +80,6 @@ public class LoginTest extends BaseTest {
 
    @Test(priority = 6)
    public void testLoginFailWithEmailAndPasswordNull() {
-      loginPage = new LoginPage(driver);
       loginPage.loginCRM("", "");
 
       loginPage.verifyLoginFailWithEmailAndPasswordNull();
@@ -69,7 +87,6 @@ public class LoginTest extends BaseTest {
 
    @Test(priority = 7)
    public void testLoginFailWithEmailFormatInvalid_01() {
-      loginPage = new LoginPage(driver);
       loginPage.loginCRM("admin@", "123456");
 
       loginPage.verifyAlertEmailFormatInvalid();
@@ -77,7 +94,6 @@ public class LoginTest extends BaseTest {
 
    @Test(priority = 8)
    public void testLoginFailWithEmailFormatInvalid_02() {
-      loginPage = new LoginPage(driver);
       loginPage.loginCRM("admin@example", "123456");
 
       loginPage.verifyLoginFail("The Email Address field must contain a valid email address.");

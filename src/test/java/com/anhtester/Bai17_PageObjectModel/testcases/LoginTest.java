@@ -2,10 +2,6 @@ package com.anhtester.Bai17_PageObjectModel.testcases;
 
 import com.anhtester.Bai17_PageObjectModel.pages.LoginPage;
 import com.anhtester.common.BaseTest;
-import com.anhtester.keywords.WebUI;
-import com.anhtester.locators.LocatorsCRM;
-import org.openqa.selenium.By;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class LoginTest extends BaseTest {
@@ -15,11 +11,11 @@ public class LoginTest extends BaseTest {
 //   @Test(priority = 1)
 //   public void testLoginCRM_Success(){
 //      driver.get("https://crm.anhtester.com/admin/authentication");
-//      WebUI.setText(driver, LocatorsCRM.inputEmail, "admin@example.com", 10);
-//      WebUI.setText(driver, LocatorsCRM.inputPassword, "123456");
-//      WebUI.clickElement(driver, By.xpath("//button[normalize-space()='Login']"));
+//      ActionKeyword.setText(driver, LocatorsCRM.inputEmail, "admin@example.com", 10);
+//      ActionKeyword.setText(driver, LocatorsCRM.inputPassword, "123456");
+//      ActionKeyword.clickElement(driver, By.xpath("//button[normalize-space()='Login']"));
 //
-//      boolean checkDashboardMenu = WebUI.isElementPresent(driver, LocatorsCRM.menuDashboard, 5);
+//      boolean checkDashboardMenu = ActionKeyword.isElementPresent(driver, LocatorsCRM.menuDashboard, 5);
 //      Assert.assertTrue(checkDashboardMenu, "Login Fail. Dashboard Menu is not present");
 //   }
 

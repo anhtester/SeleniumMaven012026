@@ -1,25 +1,19 @@
-package com.anhtester.Bai22_23_ThucHanhPOM.pages;
+package com.anhtester.Bai24_VietHamChung_WebUI.pages;
 
 import com.anhtester.constants.ConfigData;
-import com.anhtester.keywords.ActionKeyword;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import com.anhtester.keywords.WebUI;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
-import java.util.List;
 
 public class TasksPage extends BasePage {
+   //Số lần được phép gõ lại từ khoá vào ô search ajax khi danh sách chưa nạp về kịp
+   private static final int SEARCH_MAX_RETRIES = 3;
 
    private WebDriver driver;
    private WebDriverWait wait;
-   private Wait<WebDriver> ajaxSearchWait;
 
    private String tasksPageUrl = "/admin/tasks";
 
@@ -28,6 +22,8 @@ public class TasksPage extends BasePage {
    private By tableTasks = By.cssSelector("table#tasks");
    private By tableTasksBody = By.cssSelector("#tasks tbody");
    private By inputSearchTask = By.cssSelector("#tasks_filter input[type='search']");
+   //Lớp phủ "Processing..." của Datatable, hiện lên trong lúc bảng đang chờ dữ liệu ajax về
+   private By tableTasksProcessing = By.cssSelector("#tasks_processing");
 
    //Form Add New Task nằm trong modal, được render động khi bấm nút New Task
    private By modalTask = By.cssSelector("#_task_modal.in");
@@ -53,22 +49,19 @@ public class TasksPage extends BasePage {
       super(driver);
       this.driver = driver;
       wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-      ajaxSearchWait = new FluentWait<>(driver)
-              .withTimeout(Duration.ofSeconds(20))
-              .pollingEvery(Duration.ofSeconds(2))
-              .ignoring(NoSuchElementException.class, StaleElementReferenceException.class);
+      new WebUI(driver);
    }
 
    public TasksPage openTasksPage() {
       driver.get(ConfigData.BASE_URL + tasksPageUrl);
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.visibilityOfElementLocated(headerTasksSummary));
 
       return this;
    }
 
    public TasksPage verifyNavigateToTasksPage() {
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.visibilityOfElementLocated(headerTasksSummary));
       wait.until(ExpectedConditions.urlContains(tasksPageUrl));
 
@@ -127,37 +120,16 @@ public class TasksPage extends BasePage {
     * Option hiển thị theo dạng "#id - Tên project - Tên customer" nên chỉ so khớp chứa tên project.
     */
    public TasksPage selectRelatedProject(String projectName) {
-      wait.until(ExpectedConditions.elementToBeClickable(buttonRelatedItemDropdown));
-      driver.findElement(buttonRelatedItemDropdown).click();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(inputRelatedItemSearch));
-
       By optionProject = getSelectPickerOptionContains("rel_id", projectName);
-      //Perfex chỉ gắn handler ajax cho ô search sau khi dropdown hiện xong, gõ sớm hơn thì không có request nào được bắn đi.
-      //Do đó mỗi vòng chờ sẽ gõ lại từ khoá; chu kỳ 2 giây để không cắt ngang debounce của plugin.
-      ajaxSearchWait.until(driver -> {
-         List<WebElement> options = driver.findElements(optionProject);
-         if (!options.isEmpty() && options.get(0).isDisplayed()) {
-            return true;
-         }
-         typeKeywordToRelatedItemSearchBox(projectName);
-         return false;
+      WebUI.searchSelectPickerOption(buttonRelatedItemDropdown, inputRelatedItemSearch, optionProject, projectName, SEARCH_MAX_RETRIES);
+      WebUI.retryUntil(driver -> {
+         driver.findElement(optionProject).click();
+         return true;
       });
 
-      driver.findElement(optionProject).click();
       wait.until(ExpectedConditions.attributeContains(buttonRelatedItemDropdown, "title", projectName));
 
       return this;
-   }
-
-   private void typeKeywordToRelatedItemSearchBox(String keyword) {
-      List<WebElement> searchBoxes = driver.findElements(inputRelatedItemSearch);
-      if (searchBoxes.isEmpty() || !searchBoxes.get(0).isDisplayed()) {
-         //Dropdown bị đóng lại thì mở ra để vòng chờ kế tiếp gõ tiếp
-         driver.findElement(buttonRelatedItemDropdown).click();
-         return;
-      }
-      searchBoxes.get(0).clear();
-      searchBoxes.get(0).sendKeys(keyword);
    }
 
    public String getSelectedRelatedProject() {
@@ -169,7 +141,7 @@ public class TasksPage extends BasePage {
     * Lưu xong, Perfex gỡ form nhập và mở tiếp modal chi tiết của task vừa tạo.
     */
    public TasksPage clickSaveButton() {
-      ActionKeyword.clickElement(driver, buttonSave);
+      WebUI.clickElement(buttonSave);
       wait.until(ExpectedConditions.invisibilityOfElementLocated(modalTask));
       wait.until(ExpectedConditions.visibilityOfElementLocated(modalTaskDetailTitle));
 
@@ -186,45 +158,59 @@ public class TasksPage extends BasePage {
     */
    public TasksPage closeTaskDetailModal() {
       //Toast thông báo lưu thành công nằm đè lên nút đóng ở góc phải trên, chờ nó tự tắt rồi mới bấm
-      wait.until(driver -> driver.findElements(floatAlert).stream().noneMatch(WebElement::isDisplayed));
+      WebUI.retryUntil(driver -> driver.findElements(floatAlert).stream().noneMatch(WebElement::isDisplayed));
       wait.until(ExpectedConditions.elementToBeClickable(buttonCloseTaskDetail));
       driver.findElement(buttonCloseTaskDetail).click();
       wait.until(ExpectedConditions.invisibilityOfElementLocated(modalTaskDetail));
-      wait.until(driver -> driver.findElements(modalBackdrop).stream().noneMatch(WebElement::isDisplayed));
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.retryUntil(driver -> driver.findElements(modalBackdrop).stream().noneMatch(WebElement::isDisplayed));
+      WebUI.waitForPageLoaded();
 
       return this;
    }
 
+   /**
+    * Datatable của Perfex lọc bằng ajax: mỗi ký tự gõ vào ô search bắn một request
+    * và mỗi response về sẽ vẽ lại toàn bộ tbody, xoá sạch node cũ.
+    * Nếu chỉ chờ "bảng đã có chữ cần tìm" thì vẫn còn request của các ký tự cuối đang bay,
+    * lần vẽ kế tiếp sẽ làm mọi element tìm được sau đó bị stale.
+    * Vì vậy phải chờ đủ 3 mốc: bảng đã lọc xong, lớp phủ Processing đã tắt, và hết ajax đang treo.
+    */
    public TasksPage searchTask(String keyword) {
       wait.until(ExpectedConditions.visibilityOfElementLocated(inputSearchTask));
       driver.findElement(inputSearchTask).clear();
       driver.findElement(inputSearchTask).sendKeys(keyword);
       if (!keyword.isEmpty()) {
-         wait.until(driver -> {
-            String tableText = this.driver.findElement(tableTasksBody).getText();
+         //Dùng WebUI.retryUntil vì getText() cũng có thể dính stale khi tbody đang được vẽ lại
+         WebUI.retryUntil(driver -> {
+            String tableText = driver.findElement(tableTasksBody).getText();
             return tableText.contains(keyword) || tableText.contains("No matching records found");
          });
       }
+      wait.until(ExpectedConditions.invisibilityOfElementLocated(tableTasksProcessing));
+      WebUI.waitForJQueryLoad();
 
       return this;
    }
 
    public boolean isTasksTableDisplayed() {
-      ActionKeyword.waitForPageLoaded(driver);
-      return ActionKeyword.isElementPresent(driver, tableTasks, 10);
+      WebUI.waitForPageLoaded();
+      return WebUI.checkElementExist(tableTasks, 10, 1000);
    }
 
    public boolean isTaskDisplayed(String taskName) {
       searchTask(taskName);
-      return wait.until(driver -> this.driver.findElement(tableTasksBody).getText().contains(taskName));
+      return WebUI.retryUntil(driver -> driver.findElement(tableTasksBody).getText().contains(taskName));
    }
 
    public String getRelatedProjectOfTask(String taskName) {
       searchTask(taskName);
       By relatedProjectLink = By.xpath("//table[@id='tasks']//tbody/tr[contains(., " + xpathLiteral(taskName) + ")]//a[contains(@class,'task-table-related')]");
-      wait.until(ExpectedConditions.visibilityOfElementLocated(relatedProjectLink));
-      return driver.findElement(relatedProjectLink).getText().trim();
+      //Tìm và lấy text trong cùng một vòng chờ, không tách ra hai bước,
+      //vì element tìm được ở bước trước có thể đã bị thay mới khi sang bước sau
+      return WebUI.retryUntil(driver -> {
+         String text = driver.findElement(relatedProjectLink).getText().trim();
+         return text.isEmpty() ? null : text;
+      });
    }
 
    /**
@@ -236,7 +222,7 @@ public class TasksPage extends BasePage {
    private void closeDatePicker() {
       wait.until(ExpectedConditions.elementToBeClickable(inputTaskName));
       driver.findElement(inputTaskName).click();
-      wait.until(driver -> driver.findElements(datePickerPopup).stream().noneMatch(WebElement::isDisplayed));
+      WebUI.retryUntil(driver -> driver.findElements(datePickerPopup).stream().noneMatch(WebElement::isDisplayed));
    }
 
    private void setText(By locator, String value) {

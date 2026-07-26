@@ -1,11 +1,10 @@
 package com.anhtester.Bai14_JavascriptExecutor;
 
 import com.anhtester.common.BaseTest;
-import com.anhtester.keywords.WebUI;
+import com.anhtester.keywords.ActionKeyword;
 import com.anhtester.utils.LocalStorageUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebElement;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -92,11 +91,11 @@ public class DemoJSExecutor extends BaseTest {
 //
 //      driver.findElement(By.xpath("//button[normalize-space()='Login']")).click();
 
-      WebUI.setText(driver, By.xpath("//input[@id='email']"), "admin@example.com");
+      ActionKeyword.setText(driver, By.xpath("//input[@id='email']"), "admin@example.com");
       sleep(1);
-      WebUI.setText(driver, By.xpath("//input[@id='password']"), "123456");
+      ActionKeyword.setText(driver, By.xpath("//input[@id='password']"), "123456");
       sleep(1);
-      WebUI.clickElement(driver, By.xpath("//button[normalize-space()='Login']"));
+      ActionKeyword.clickElement(driver, By.xpath("//button[normalize-space()='Login']"));
       sleep(3);
    }
 }

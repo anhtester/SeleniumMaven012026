@@ -1,12 +1,8 @@
-package com.anhtester.Bai22_23_ThucHanhPOM.pages;
+package com.anhtester.Bai24_VietHamChung_WebUI.pages;
 
 import com.anhtester.constants.ConfigData;
-import com.anhtester.keywords.ActionKeyword;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import com.anhtester.keywords.WebUI;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -26,6 +22,8 @@ public class CustomersPage extends BasePage {
    private By tableCustomers = By.xpath("//table[@id='clients' and contains(@class,'dataTable')]");
    private By tableCustomersBody = By.cssSelector("#clients tbody");
    private By inputSearchCustomer = By.cssSelector("#clients_filter input[type='search']");
+   //Lớp phủ "Processing..." của Datatable, hiện lên trong lúc bảng đang chờ dữ liệu ajax về
+   private By tableCustomersProcessing = By.cssSelector("#clients_processing");
 
    private By tabCustomerDetails = By.cssSelector("a[href='#contact_info']");
    private By tabBillingAndShipping = By.cssSelector("a[href='#billing_and_shipping']");
@@ -72,20 +70,21 @@ public class CustomersPage extends BasePage {
       super(driver);
       this.driver = driver;
       wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+      new WebUI(driver);
    }
 
    //Khai báo trả về theo kiểu Fluent Page
    //Trả về chính class này, để thuận tiện quá trình gọi sử dụng tại class test
    public CustomersPage openCustomersPage() {
       driver.get(ConfigData.BASE_URL + customersPageUrl);
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.visibilityOfElementLocated(headerCustomersSummary));
 
       return this;
    }
 
    public CustomersPage verifyNavigateToCustomersPage() {
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.visibilityOfElementLocated(headerCustomersSummary));
       wait.until(ExpectedConditions.urlContains(customersPageUrl));
 
@@ -95,30 +94,40 @@ public class CustomersPage extends BasePage {
    public CustomersPage clickNewCustomerButton() {
       wait.until(ExpectedConditions.elementToBeClickable(buttonNewCustomer));
       driver.findElement(buttonNewCustomer).click();
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.visibilityOfElementLocated(inputCompany));
 
       return this;
    }
 
    public CustomersPage verifyNavigateToAddNewCustomerPage() {
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.visibilityOfElementLocated(inputCompany));
       wait.until(ExpectedConditions.urlContains(addNewCustomerPageUrl));
 
       return this;
    }
 
+   /**
+    * Datatable của Perfex lọc bằng ajax: mỗi ký tự gõ vào ô search bắn một request
+    * và mỗi response về sẽ vẽ lại toàn bộ tbody, xoá sạch node cũ.
+    * Nếu chỉ chờ "bảng đã có chữ cần tìm" thì vẫn còn request của các ký tự cuối đang bay,
+    * lần vẽ kế tiếp sẽ làm mọi element tìm được sau đó bị stale.
+    * Vì vậy phải chờ đủ 3 mốc: bảng đã lọc xong, lớp phủ Processing đã tắt, và hết ajax đang treo.
+    */
    public CustomersPage searchCustomer(String keyword) {
       wait.until(ExpectedConditions.visibilityOfElementLocated(inputSearchCustomer));
       driver.findElement(inputSearchCustomer).clear();
       driver.findElement(inputSearchCustomer).sendKeys(keyword);
       if (!keyword.isEmpty()) {
-         wait.until(driver -> {
-            String tableText = this.driver.findElement(tableCustomersBody).getText();
+         //Dùng WebUI.retryUntil vì getText() cũng có thể dính stale khi tbody đang được vẽ lại
+         WebUI.retryUntil(driver -> {
+            String tableText = driver.findElement(tableCustomersBody).getText();
             return tableText.contains(keyword) || tableText.contains("No matching records found");
          });
       }
+      wait.until(ExpectedConditions.invisibilityOfElementLocated(tableCustomersProcessing));
+      WebUI.waitForJQueryLoad();
 
       return this;
    }
@@ -228,19 +237,19 @@ public class CustomersPage extends BasePage {
    }
 
    public CustomersPage clickSaveButton() {
-      ActionKeyword.clickElement(driver, buttonSave);
+      WebUI.clickElement(buttonSave);
 
       return this;
    }
 
    public CustomersPage clickSaveAndCreateContactButton() {
-      ActionKeyword.clickElement(driver, buttonSaveAndCreateContact);
+      WebUI.clickElement(buttonSaveAndCreateContact);
 
       return this;
    }
 
    public CustomersPage waitForCustomerProfilePage() {
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.urlMatches(".*/admin/clients/client/\\d+$"));
       wait.until(ExpectedConditions.visibilityOfElementLocated(inputCompany));
 
@@ -248,35 +257,29 @@ public class CustomersPage extends BasePage {
    }
 
    public boolean isCustomersTableDisplayed() {
-      ActionKeyword.waitForPageLoaded(driver);
-      return ActionKeyword.isElementPresent(driver, tableCustomers, 10);
+      WebUI.waitForPageLoaded();
+      return WebUI.checkElementExist(tableCustomers, 10, 1000);
    }
 
    public boolean isCustomerDisplayed(String companyName) {
       searchCustomer(companyName);
-      return wait.until(driver -> this.driver.findElement(tableCustomersBody).getText().contains(companyName));
+      return WebUI.retryUntil(driver -> driver.findElement(tableCustomersBody).getText().contains(companyName));
    }
 
    public boolean isCustomerNotDisplayed(String companyName) {
       searchCustomer(companyName);
-      return wait.until(driver -> !this.driver.findElement(tableCustomersBody).getText().contains(companyName));
+      return WebUI.retryUntil(driver -> !driver.findElement(tableCustomersBody).getText().contains(companyName));
    }
 
    public CustomersPage deleteCustomerByCompanyName(String companyName) {
       searchCustomer(companyName);
       By deleteCustomerLink = getDeleteCustomerLink(companyName);
-      String deleteUrl = wait.until(driver -> {
-         try {
-            return this.driver.findElement(deleteCustomerLink).getAttribute("href");
-         } catch (Exception exception) {
-            return null;
-         }
-      });
+      String deleteUrl = WebUI.retryUntil(driver -> driver.findElement(deleteCustomerLink).getAttribute("href"));
       driver.get(deleteUrl);
-      ActionKeyword.waitForPageLoaded(driver);
+      WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.visibilityOfElementLocated(headerCustomersSummary));
       searchCustomer(companyName);
-      wait.until(driver -> !this.driver.findElement(tableCustomersBody).getText().contains(companyName));
+      WebUI.retryUntil(driver -> !driver.findElement(tableCustomersBody).getText().contains(companyName));
 
       return this;
    }
@@ -285,18 +288,32 @@ public class CustomersPage extends BasePage {
       searchCustomer(companyName);
 
       By companyNameLink = getCompanyNameLink(companyName);
-      WebElement companyNameElement = wait.until(ExpectedConditions.visibilityOfElementLocated(companyNameLink));
-      new Actions(driver).moveToElement(companyNameElement).perform();
-
       By deleteCustomerLink = getDeleteCustomerLink(companyName);
-      wait.until(ExpectedConditions.elementToBeClickable(deleteCustomerLink));
-      driver.findElement(deleteCustomerLink).click();
+
+      //Datatable có thể vẽ lại ngay sau khi lọc làm element cũ bị stale,
+      //nên gom hover + bấm Delete vào một vòng chờ có thể thử lại.
+      //Điểm mấu chốt: tìm lại element trong từng vòng, KHÔNG giữ sẵn WebElement từ bên ngoài,
+      //vì WebElement chỉ là tham chiếu tới node cũ và không tự tìm lại khi node đó bị thay mới.
+      WebUI.retryUntil(driver -> {
+         WebElement companyNameElement = driver.findElement(companyNameLink);
+         //Cuộn dòng vào giữa màn hình rồi mới hover, chuột không di tới element ngoài viewport được
+         WebUI.scrollToElement(companyNameElement);
+         new Actions(driver).moveToElement(companyNameElement).perform();
+
+         //Hover có thể chưa kịp ăn, link Delete vẫn đang ẩn thì trả false để hover lại ở vòng sau
+         WebElement deleteLink = driver.findElement(deleteCustomerLink);
+         if (!deleteLink.isDisplayed()) {
+            return false;
+         }
+         deleteLink.click();
+         return true;
+      });
 
       wait.until(ExpectedConditions.alertIsPresent());
       Alert confirmAlert = driver.switchTo().alert();
       confirmAlert.accept();
 
-      wait.until(driver -> !this.driver.findElement(tableCustomersBody).getText().contains(companyName));
+      WebUI.retryUntil(driver -> !driver.findElement(tableCustomersBody).getText().contains(companyName));
 
       return this;
    }
