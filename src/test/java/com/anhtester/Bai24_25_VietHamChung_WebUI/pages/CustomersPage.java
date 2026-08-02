@@ -1,4 +1,4 @@
-package com.anhtester.Bai24_VietHamChung_WebUI.pages;
+package com.anhtester.Bai24_25_VietHamChung_WebUI.pages;
 
 import com.anhtester.constants.ConfigData;
 import com.anhtester.keywords.WebUI;
@@ -76,34 +76,33 @@ public class CustomersPage extends BasePage {
    //Khai báo trả về theo kiểu Fluent Page
    //Trả về chính class này, để thuận tiện quá trình gọi sử dụng tại class test
    public CustomersPage openCustomersPage() {
-      driver.get(ConfigData.BASE_URL + customersPageUrl);
+      WebUI.openURL(ConfigData.BASE_URL + customersPageUrl);
       WebUI.waitForPageLoaded();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(headerCustomersSummary));
+      WebUI.waitForElementVisible(headerCustomersSummary);
 
       return this;
    }
 
    public CustomersPage verifyNavigateToCustomersPage() {
       WebUI.waitForPageLoaded();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(headerCustomersSummary));
-      wait.until(ExpectedConditions.urlContains(customersPageUrl));
+      WebUI.waitForElementVisible(headerCustomersSummary);
+      WebUI.waitForCurrentURLContains(customersPageUrl);
 
       return this;
    }
 
    public CustomersPage clickNewCustomerButton() {
-      wait.until(ExpectedConditions.elementToBeClickable(buttonNewCustomer));
-      driver.findElement(buttonNewCustomer).click();
+      WebUI.clickElement(buttonNewCustomer);
       WebUI.waitForPageLoaded();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(inputCompany));
+      WebUI.waitForElementVisible(inputCompany);
 
       return this;
    }
 
    public CustomersPage verifyNavigateToAddNewCustomerPage() {
       WebUI.waitForPageLoaded();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(inputCompany));
-      wait.until(ExpectedConditions.urlContains(addNewCustomerPageUrl));
+      WebUI.waitForElementVisible(inputCompany);
+      WebUI.waitForCurrentURLContains(addNewCustomerPageUrl);
 
       return this;
    }
@@ -116,9 +115,7 @@ public class CustomersPage extends BasePage {
     * Vì vậy phải chờ đủ 3 mốc: bảng đã lọc xong, lớp phủ Processing đã tắt, và hết ajax đang treo.
     */
    public CustomersPage searchCustomer(String keyword) {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(inputSearchCustomer));
-      driver.findElement(inputSearchCustomer).clear();
-      driver.findElement(inputSearchCustomer).sendKeys(keyword);
+      WebUI.setText(inputSearchCustomer, keyword);
       if (!keyword.isEmpty()) {
          //Dùng WebUI.retryUntil vì getText() cũng có thể dính stale khi tbody đang được vẽ lại
          WebUI.retryUntil(driver -> {
@@ -126,34 +123,33 @@ public class CustomersPage extends BasePage {
             return tableText.contains(keyword) || tableText.contains("No matching records found");
          });
       }
-      wait.until(ExpectedConditions.invisibilityOfElementLocated(tableCustomersProcessing));
+      //wait.until(ExpectedConditions.invisibilityOfElementLocated(tableCustomersProcessing));
+      WebUI.waitForElementInVisible(tableCustomersProcessing);
       WebUI.waitForJQueryLoad();
 
       return this;
    }
 
    public CustomersPage clickCustomerDetailsTab() {
-      wait.until(ExpectedConditions.elementToBeClickable(tabCustomerDetails));
-      driver.findElement(tabCustomerDetails).click();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(inputCompany));
+      WebUI.clickElement(tabCustomerDetails);
+      WebUI.waitForElementVisible(inputCompany);
 
       return this;
    }
 
    public CustomersPage clickBillingAndShippingTab() {
-      wait.until(ExpectedConditions.elementToBeClickable(tabBillingAndShipping));
-      driver.findElement(tabBillingAndShipping).click();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(textareaBillingStreet));
+      WebUI.clickElement(tabBillingAndShipping);
+      WebUI.waitForElementVisible(textareaBillingStreet);
 
       return this;
    }
 
    public CustomersPage setShowPrimaryContactOnDocuments(boolean isChecked) {
       clickCustomerDetailsTab();
-      WebElement checkbox = wait.until(ExpectedConditions.presenceOfElementLocated(checkboxShowPrimaryContact));
-      if (checkbox.isSelected() != isChecked) {
-         wait.until(ExpectedConditions.elementToBeClickable(labelShowPrimaryContact));
-         driver.findElement(labelShowPrimaryContact).click();
+      //Checkbox gốc bị plugin ẩn đi nên chỉ chờ present, và phải bấm vào label mới ăn
+      WebUI.waitForElementPresent(checkboxShowPrimaryContact);
+      if (WebUI.getWebElement(checkboxShowPrimaryContact).isSelected() != isChecked) {
+         WebUI.clickElement(labelShowPrimaryContact);
       }
 
       return this;
@@ -161,10 +157,10 @@ public class CustomersPage extends BasePage {
 
    public CustomersPage fillCustomerDetails(String company, String vatNumber, String phone, String website) {
       clickCustomerDetailsTab();
-      setText(inputCompany, company);
-      setText(inputVatNumber, vatNumber);
-      setText(inputPhone, phone);
-      setText(inputWebsite, website);
+      WebUI.setText(inputCompany, company);
+      WebUI.setText(inputVatNumber, vatNumber);
+      WebUI.setText(inputPhone, phone);
+      WebUI.setText(inputWebsite, website);
 
       return this;
    }
@@ -189,10 +185,10 @@ public class CustomersPage extends BasePage {
 
    public CustomersPage fillAddress(String address, String city, String state, String zipCode, String countryName) {
       clickCustomerDetailsTab();
-      setText(textareaAddress, address);
-      setText(inputCity, city);
-      setText(inputState, state);
-      setText(inputZipCode, zipCode);
+      WebUI.setText(textareaAddress, address);
+      WebUI.setText(inputCity, city);
+      WebUI.setText(inputState, state);
+      WebUI.setText(inputZipCode, zipCode);
       selectPickerByText(selectCountry, "country", countryName);
 
       return this;
@@ -200,10 +196,10 @@ public class CustomersPage extends BasePage {
 
    public CustomersPage fillBillingAddress(String street, String city, String state, String zipCode, String countryName) {
       clickBillingAndShippingTab();
-      setText(textareaBillingStreet, street);
-      setText(inputBillingCity, city);
-      setText(inputBillingState, state);
-      setText(inputBillingZipCode, zipCode);
+      WebUI.setText(textareaBillingStreet, street);
+      WebUI.setText(inputBillingCity, city);
+      WebUI.setText(inputBillingState, state);
+      WebUI.setText(inputBillingZipCode, zipCode);
       selectPickerByText(selectBillingCountry, "billing_country", countryName);
 
       return this;
@@ -211,10 +207,10 @@ public class CustomersPage extends BasePage {
 
    public CustomersPage fillShippingAddress(String street, String city, String state, String zipCode, String countryName) {
       clickBillingAndShippingTab();
-      setText(textareaShippingStreet, street);
-      setText(inputShippingCity, city);
-      setText(inputShippingState, state);
-      setText(inputShippingZipCode, zipCode);
+      WebUI.setText(textareaShippingStreet, street);
+      WebUI.setText(inputShippingCity, city);
+      WebUI.setText(inputShippingState, state);
+      WebUI.setText(inputShippingZipCode, zipCode);
       selectPickerByText(selectShippingCountry, "shipping_country", countryName);
 
       return this;
@@ -222,16 +218,14 @@ public class CustomersPage extends BasePage {
 
    public CustomersPage clickBillingSameAsCustomerInfo() {
       clickBillingAndShippingTab();
-      wait.until(ExpectedConditions.elementToBeClickable(linkBillingSameAsCustomerInfo));
-      driver.findElement(linkBillingSameAsCustomerInfo).click();
+      WebUI.clickElement(linkBillingSameAsCustomerInfo);
 
       return this;
    }
 
    public CustomersPage clickCopyBillingAddress() {
       clickBillingAndShippingTab();
-      wait.until(ExpectedConditions.elementToBeClickable(linkCopyBillingAddress));
-      driver.findElement(linkCopyBillingAddress).click();
+      WebUI.clickElement(linkCopyBillingAddress);
 
       return this;
    }
@@ -251,7 +245,7 @@ public class CustomersPage extends BasePage {
    public CustomersPage waitForCustomerProfilePage() {
       WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.urlMatches(".*/admin/clients/client/\\d+$"));
-      wait.until(ExpectedConditions.visibilityOfElementLocated(inputCompany));
+      WebUI.waitForElementVisible(inputCompany);
 
       return this;
    }
@@ -275,9 +269,9 @@ public class CustomersPage extends BasePage {
       searchCustomer(companyName);
       By deleteCustomerLink = getDeleteCustomerLink(companyName);
       String deleteUrl = WebUI.retryUntil(driver -> driver.findElement(deleteCustomerLink).getAttribute("href"));
-      driver.get(deleteUrl);
+      WebUI.openURL(deleteUrl);
       WebUI.waitForPageLoaded();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(headerCustomersSummary));
+      WebUI.waitForElementVisible(headerCustomersSummary);
       searchCustomer(companyName);
       WebUI.retryUntil(driver -> !driver.findElement(tableCustomersBody).getText().contains(companyName));
 
@@ -309,9 +303,10 @@ public class CustomersPage extends BasePage {
          return true;
       });
 
-      wait.until(ExpectedConditions.alertIsPresent());
-      Alert confirmAlert = driver.switchTo().alert();
-      confirmAlert.accept();
+//      wait.until(ExpectedConditions.alertIsPresent());
+//      Alert confirmAlert = driver.switchTo().alert();
+//      confirmAlert.accept();
+      WebUI.acceptAlert();
 
       WebUI.retryUntil(driver -> !driver.findElement(tableCustomersBody).getText().contains(companyName));
 
@@ -323,75 +318,59 @@ public class CustomersPage extends BasePage {
    }
 
    public String getCompanyValue() {
-      return getInputValue(inputCompany);
+      return WebUI.getElementAttribute(inputCompany, "value");
    }
 
    public String getVatNumberValue() {
-      return getInputValue(inputVatNumber);
+      return WebUI.getElementAttribute(inputVatNumber, "value");
    }
 
    public String getPhoneValue() {
-      return getInputValue(inputPhone);
+      return WebUI.getElementAttribute(inputPhone, "value");
    }
 
    public String getWebsiteValue() {
-      return getInputValue(inputWebsite);
+      return WebUI.getElementAttribute(inputWebsite, "value");
    }
 
    public String getAddressValue() {
-      return getInputValue(textareaAddress);
+      return WebUI.getElementAttribute(textareaAddress, "value");
    }
 
    public String getCityValue() {
-      return getInputValue(inputCity);
+      return WebUI.getElementAttribute(inputCity, "value");
    }
 
    public String getStateValue() {
-      return getInputValue(inputState);
+      return WebUI.getElementAttribute(inputState, "value");
    }
 
    public String getZipCodeValue() {
-      return getInputValue(inputZipCode);
+      return WebUI.getElementAttribute(inputZipCode, "value");
    }
 
    public String getSelectedGroupsValue() {
-      return getSelectPickerTitle(buttonGroupsDropdown);
+      return WebUI.getElementAttribute(buttonGroupsDropdown, "title");
    }
 
    public String getSelectedDefaultCurrencyValue() {
-      return getSelectPickerTitle(buttonDefaultCurrencyDropdown);
+      return WebUI.getElementAttribute(buttonDefaultCurrencyDropdown, "title");
    }
 
    public String getSelectedDefaultLanguageValue() {
-      return getSelectPickerTitle(buttonDefaultLanguageDropdown);
+      return WebUI.getElementAttribute(buttonDefaultLanguageDropdown, "title");
    }
 
    public String getSelectedCountryValue() {
-      return getSelectPickerTitle(buttonCountryDropdown);
+      return WebUI.getElementAttribute(buttonCountryDropdown, "title");
    }
 
    public String getSelectedBillingCountryValue() {
-      return getSelectPickerTitle(buttonBillingCountryDropdown);
+      return WebUI.getElementAttribute(buttonBillingCountryDropdown, "title");
    }
 
    public String getSelectedShippingCountryValue() {
-      return getSelectPickerTitle(buttonShippingCountryDropdown);
-   }
-
-   private void setText(By locator, String value) {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-      driver.findElement(locator).clear();
-      driver.findElement(locator).sendKeys(value);
-   }
-
-   private String getSelectPickerTitle(By locator) {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-      return driver.findElement(locator).getAttribute("title");
-   }
-
-   private String getInputValue(By locator) {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-      return driver.findElement(locator).getAttribute("value");
+      return WebUI.getElementAttribute(buttonShippingCountryDropdown, "title");
    }
 
    private By getDeleteCustomerLink(String companyName) {
@@ -403,7 +382,7 @@ public class CustomersPage extends BasePage {
    }
 
    private void selectPickerByText(By selectLocator, String selectId, String visibleText) {
-      wait.until(ExpectedConditions.presenceOfElementLocated(selectLocator));
+      WebUI.waitForElementPresent(selectLocator);
       String js =
               "var sel=document.getElementById(arguments[0]);" +
                       "if(!sel){return 'NO_SELECT';}" +

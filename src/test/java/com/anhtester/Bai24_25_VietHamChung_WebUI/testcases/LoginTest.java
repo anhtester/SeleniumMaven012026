@@ -1,10 +1,10 @@
-package com.anhtester.Bai24_VietHamChung_WebUI.testcases;
+package com.anhtester.Bai24_25_VietHamChung_WebUI.testcases;
 
-import com.anhtester.Bai24_VietHamChung_WebUI.pages.DashboardPage;
-import com.anhtester.Bai24_VietHamChung_WebUI.pages.LoginPage;
+import com.anhtester.Bai24_25_VietHamChung_WebUI.pages.DashboardPage;
+import com.anhtester.Bai24_25_VietHamChung_WebUI.pages.LoginPage;
 import com.anhtester.common.BaseTest;
 import com.anhtester.constants.ConfigData;
-import org.testng.Assert;
+import com.anhtester.keywords.WebUI;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -34,11 +34,11 @@ public class LoginTest extends BaseTest {
 
    @Test
    public void testPatternAAA(){
-      driver.get(ConfigData.LOGIN_URL);
+      WebUI.openURL(ConfigData.LOGIN_URL);
       String email = "admin@example.com";
       String password = "123456";
 
-      softAssert.assertEquals(driver.getCurrentUrl(), ConfigData.LOGIN_URL, "Fail. Login page URL is incorrect.");
+      softAssert.assertEquals(WebUI.getCurrentURL(), ConfigData.LOGIN_URL, "Fail. Login page URL is incorrect.");
       softAssert.assertEquals(loginPage.getHeaderLoginPage(), loginPage.LOGIN_PAGE_HEADER_TEXT, "Fail. The Login page header text is not match.");
 
       dashboardPage = loginPage.loginCRM(email, password);

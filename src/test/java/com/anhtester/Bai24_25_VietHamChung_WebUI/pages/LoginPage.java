@@ -1,8 +1,9 @@
-package com.anhtester.Bai24_VietHamChung_WebUI.pages;
+package com.anhtester.Bai24_25_VietHamChung_WebUI.pages;
 
 import com.anhtester.constants.ConfigData;
 import com.anhtester.keywords.WebUI;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -33,8 +34,6 @@ public class LoginPage extends BasePage {
    public LoginPage(WebDriver driver) {
       super(driver);
       this.driver = driver; //Truyền giá trị cho driver
-      //driver = _driver;
-      wait = new WebDriverWait(driver, Duration.ofSeconds(5)); //Khởi tạo giá trị cho wait
       new WebUI(driver);
    }
 
@@ -50,39 +49,41 @@ public class LoginPage extends BasePage {
    }
 
    public String getHeaderLoginPage() {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(headerPage));
-      return driver.findElement(headerPage).getText();
+      return WebUI.getElementText(headerPage);
    }
 
    //Khai báo các hàm xử lý automation phục vụ cho trang Login
    private void setEmail(String email) {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(inputEmail));
-      driver.findElement(inputEmail).sendKeys(email);
+//      wait.until(ExpectedConditions.visibilityOfElementLocated(inputEmail));
+//      driver.findElement(inputEmail).sendKeys(email);
+      WebUI.setText(inputEmail, email);
    }
 
    private void setPassword(String password) {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(inputPassword));
-      driver.findElement(inputPassword).sendKeys(password);
+      WebUI.setText(inputPassword, password);
    }
 
    private void clickLoginButton() {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(buttonLogin));
-      driver.findElement(buttonLogin).click();
+//      wait.until(ExpectedConditions.visibilityOfElementLocated(buttonLogin));
+//      driver.findElement(buttonLogin).click();
+      WebUI.clickElement(buttonLogin);
    }
 
    public void verifyLoginSuccess() {
       new DashboardPage(driver).verifyNavigateToDashboardPage();
-      wait.until(ExpectedConditions.urlContains("/admin/"));
+      //wait.until(ExpectedConditions.urlContains("/admin/"));
+      WebUI.waitForCurrentURLContains("/admin/");
       Assert.assertTrue(driver.getCurrentUrl().contains("/admin/"), "FAIL. Không chuyển hướng sang trang Dashboard");
       Assert.assertFalse(driver.getCurrentUrl().contains("authentication"), "FAIL. Vẫn đang ở trang Login");
    }
 
    public void verifyLoginFail(String message) {
       WebUI.waitForPageLoaded();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(errorMessage));
-      Assert.assertTrue(driver.findElement(errorMessage).isDisplayed(), "Error message NOT displays");
-      Assert.assertEquals(driver.findElement(errorMessage).getText(), message, "Content of error massage NOT match.");
-      Assert.assertTrue(driver.getCurrentUrl().contains("authentication"), "FAIL. Không còn ở trang Login");
+      //WebUI.waitForElementVisible(errorMessage);
+      Assert.assertTrue(WebUI.checkElementExist(errorMessage, 10, 1000), "Error message NOT displays");
+      WebUI.assertEquals(WebUI.getElementText(errorMessage), message, "Content of error massage NOT match.");
+      //Assert.assertTrue(driver.getCurrentUrl().contains("authentication"), "FAIL. Không còn ở trang Login");
+      WebUI.assertContains(WebUI.getCurrentURL(), "authentication", "FAIL. Không còn ở trang Login");
    }
 
    public void verifyLoginFailWithEmailAndPasswordNull() {
@@ -92,20 +93,20 @@ public class LoginPage extends BasePage {
       boolean checkPasswordErrorMessage = WebUI.checkElementExist(alertPasswordRequiredMessage, 5, 1000);
       Assert.assertTrue(checkPasswordErrorMessage, "Fail. The Password Error Message is not present");
 
-      Assert.assertEquals(driver.getCurrentUrl(), "https://crm.anhtester.com/admin/authentication", "The Current LOGIN_URL is not correct");
+      Assert.assertEquals(WebUI.getCurrentURL(), "https://crm.anhtester.com/admin/authentication", "The Current LOGIN_URL is not correct");
    }
 
    public void verifyAlertEmailFormatInvalid() {
-      String emailMessage = driver.findElement(inputEmail).getAttribute("validationMessage");
-      System.out.println(emailMessage);
+//      String emailMessage = driver.findElement(inputEmail).getAttribute("validationMessage");
+//      System.out.println(emailMessage);
 
-      Assert.assertEquals(emailMessage, "Please enter a part following '@'. 'admin@' is incomplete.", "Fail. The HTML5 Error Message is not match.");
+      Assert.assertEquals(WebUI.getElementAttribute(inputEmail, "validationMessage"), "Please enter a part following '@'. 'admin@' is incomplete.", "Fail. The HTML5 Error Message is not match.");
    }
 
    //Các hàm xử lý cho chính trang này
    public DashboardPage loginCRM(String email, String password) {
       //https://crm.anhtester.com/admin/authentication
-      driver.get(ConfigData.LOGIN_URL); //Gọi từ class ConfigData dạng biến static
+      WebUI.openURL(ConfigData.LOGIN_URL); //Gọi từ class ConfigData dạng biến static
       verifyNavigateToTheLoginPage();
       setEmail(email);
       setPassword(password);
@@ -115,7 +116,7 @@ public class LoginPage extends BasePage {
    }
 
    public DashboardPage loginCRM_AdminRole() {
-      driver.get(ConfigData.LOGIN_URL);
+      WebUI.openURL(ConfigData.LOGIN_URL);
       verifyNavigateToTheLoginPage();
       setEmail(ConfigData.EMAIL_ADMIN);
       setPassword(ConfigData.PASSWORD_ADMIN);

@@ -29,6 +29,7 @@
   - [Bài 21 — Page Navigation (Liên kết trang)](#bài-21--page-navigation-liên-kết-trang)
   - [Bài 22 & 23 — Thực hành POM hoàn chỉnh](#bài-22--23--thực-hành-pom-hoàn-chỉnh)
   - [Bài 24 — Viết hàm chung với class WebUI](#bài-24--viết-hàm-chung-với-class-webui)
+  - [Bài 25 — Mở rộng bộ keyword WebUI](#bài-25--mở-rộng-bộ-keyword-webui)
 - [Dữ liệu trung gian giữa các test case](#-dữ-liệu-trung-gian-giữa-các-test-case)
 - [Cách chạy test](#-cách-chạy-test)
 - [Giấy phép](#-giấy-phép)
@@ -98,7 +99,9 @@ SeleniumMaven012026/
 │   │   │   └── ConfigData.java     # Hằng số dùng chung (URL, tài khoản, tên file JSON test data)
 │   │   ├── keywords/
 │   │   │   ├── ActionKeyword.java  # Lớp keyword đời đầu — nhận WebDriver ở từng hàm (dùng từ Bài 15 → 23)
-│   │   │   └── WebUI.java          # Lớp keyword dùng chung của Bài 24 — giữ driver static, có smart wait + retry
+│   │   │   ├── WebUI.java          # Lớp keyword Web dùng chung (Bài 24 & 25) — giữ driver static, smart wait + retry
+│   │   │   ├── MobileUI.java       # (placeholder) Lớp keyword cho Mobile Automation — Appium
+│   │   │   └── APIKeyword.java     # (placeholder) Lớp keyword cho API Automation — REST Assured
 │   │   └── utils/
 │   │       ├── CaptureUtils.java       # Chụp màn hình bằng Robot class
 │   │       ├── ColorUtils.java         # Lấy mã màu HEX của pixel trên màn hình
@@ -223,7 +226,7 @@ SeleniumMaven012026/
 │       │   │       ├── ProjectsTest.java    # 2 TC: thêm mới + xóa Project
 │       │   │       └── TasksTest.java       # 1 TC: thêm Task gắn với Project
 │       │   │
-│       │   └── Bai24_VietHamChung_WebUI/    # 📌 Bài 24: Viết hàm chung với class WebUI
+│       │   └── Bai24_25_VietHamChung_WebUI/ # 📌 Bài 24 & 25: Viết hàm chung với class WebUI
 │       │       ├── pages/                   # Cùng 6 page như Bài 22 & 23 nhưng gọi keyword WebUI
 │       │       │   ├── BasePage.java        # Menu + xpathLiteral + truyền driver cho WebUI
 │       │       │   ├── LoginPage.java
@@ -245,12 +248,13 @@ SeleniumMaven012026/
 │           │   ├── SuiteAnnotations.xml
 │           │   ├── SuiteLoginTest_Annotation.xml
 │           │   ├── SuiteRegresionThucHanhPOM.xml   # Chạy toàn bộ Bài 22 & 23
-│           │   └── SuiteRegresion.xml              # Chạy toàn bộ Bài 24
+│           │   └── SuiteRegresion.xml              # Chạy toàn bộ Bài 24 & 25
 │           │
 │           └── testdata/                    # File JSON trung gian (tự sinh khi chạy test)
 │               ├── customer_data.json
 │               └── project_data.json
 │
+├── exports/screenshots/             # Ảnh chụp màn hình do WebUI.takeScreenshot() sinh ra
 └── target/                          # Thư mục output (auto-generated)
 ```
 
@@ -715,9 +719,84 @@ public BasePage(WebDriver driver) {
 
 ---
 
+### Bài 25 — Mở rộng bộ keyword WebUI
+
+> Bài 24 mới phủ được nhóm thao tác cơ bản (click, nhập liệu, chờ, đọc dữ liệu). Bài 25 bổ sung **57 hàm** cho các nhóm còn thiếu, để `WebUI` đủ dùng cho một dự án thật mà page class không phải viết Selenium thô nữa.
+
+**Các nhóm keyword bổ sung**
+
+| Nhóm | Hàm | Dùng khi nào |
+| :--- | :--- | :--- |
+| **Dropdown `<select>`** | `selectOptionByText`, `selectOptionByValue`, `selectOptionByIndex`, `getSelectedOptionText`, `getAllOptionsText` | Dropdown chuẩn HTML — bọc sẵn class `Select` |
+| **Checkbox / Radio** | `checkCheckbox`, `uncheckCheckbox`, `setCheckboxState`, `selectRadioButton` | Tick/bỏ tick, chọn radio |
+| **Kiểm tra trạng thái** | `isElementVisible`, `isElementClickable`, `isElementEnabled`, `isElementSelected` | Trả `true/false`, **không** làm fail test |
+| **Lấy dữ liệu hàng loạt** | `getAllElementsText`, `getElementCount`, `getElementValue`, `getElementDomAttribute` | Verify cả cột trong datatable, đọc giá trị ô input |
+| **Javascript fallback** | `executeJS`, `clickElementByJS`, `setTextByJS`, `scrollToTopPage`, `scrollToBottomPage` | Khi cách thao tác thường bị chặn |
+| **Frame** | `switchToFrame` (By / index / name), `switchToDefaultContent` | Nội dung nằm trong iframe |
+| **Cửa sổ & tab** | `getCurrentWindowHandle`, `getAllWindowHandles`, `switchToWindowByIndex`, `switchToWindowByTitle`, `openNewTab`, `closeCurrentTab` | Link mở tab mới, popup window |
+| **Điều khiển browser** | `refreshPage`, `navigateBack`, `navigateForward`, `getPageTitle`, `setWindowSize`, `setWindowSizeDesktop`, `maximizeWindow` | Điều hướng, đặt kích thước cửa sổ |
+| **Chụp màn hình** | `takeScreenshot`, `takeElementScreenshot` | Lưu bằng chứng khi test fail |
+| **Upload file** | `uploadFile`, `uploadFileToHiddenInput` | Đưa file vào ô chọn file |
+| **Wait mở rộng** | `waitForTextToBePresent`, `waitForNumberOfElements`, `waitForStalenessOf`, `waitForAttributeContains`, `waitForTitleContains` | Các mốc chờ mà Bài 24 chưa có |
+| **Cookie** | `addCookie`, `getAllCookies`, `getCookieValue`, `deleteCookie`, `deleteAllCookies` | Quản lý phiên đăng nhập |
+
+**Kiến thức chính:**
+
+- **Hai kiểu hàm cho cùng một câu hỏi — `waitForXxx` và `isXxx`:** cùng hỏi "element có hiện không" nhưng dùng cho hai tình huống khác hẳn nhau.
+  - `waitForElementVisible(by)` — element **bắt buộc** phải có. Không có thì `Assert.fail` ngay tại chỗ sai, log chỉ đúng một dòng lỗi.
+  - `isElementVisible(by, timeOut)` — chỉ trả `true/false` để **rẽ nhánh**: có banner quảng cáo thì đóng, không có thì đi tiếp.
+
+  Dùng nhầm chiều nào cũng đau: lấy `waitFor` đi rẽ nhánh thì test fail oan; lấy `is` cho điều kiện bắt buộc thì test chạy tiếp và fail ở tận bước sau với thông báo chẳng liên quan.
+
+- **`setCheckboxState(by, boolean)` — đặt trạng thái, đừng click mù.** Click mù gọi hai lần là trạng thái lật ngược trở lại, kết quả phụ thuộc vào việc trước đó đã click mấy lần. Hàm này đọc `isSelected()` rồi mới quyết định có click hay không, nên gọi bao nhiêu lần kết quả vẫn như nhau. Điều kiện trả về **trạng thái thực tế** nên nếu cú click chưa ăn thì `retryUntil` tự click lại:
+
+  ```java
+  retryUntil(_driver -> {
+     WebElement element = _driver.findElement(by);
+     if (element.isSelected() != expectedChecked) {
+        element.click();
+        return false;   //Chưa đúng trạng thái → vòng chờ thử lại
+     }
+     return true;
+  });
+  ```
+
+- **`getElementValue()` khác `getElementAttribute("value")` — đây là bẫy rất hay gặp khi verify form.** `getAttribute("value")` đọc thuộc tính viết trong HTML gốc, tức giá trị **khởi tạo**; chữ người dùng vừa gõ nằm ở DOM property chứ không nằm trong HTML. Vì vậy verify ô input phải dùng:
+  - `getElementValue(by)` → `getDomProperty("value")` — giá trị **đang** có trong ô.
+  - `getElementDomAttribute(by, name)` → `getDomAttribute(name)` — thuộc tính HTML gốc (`href`, `placeholder`, `data-id`).
+
+- **`setTextByJS` bắt buộc bắn kèm event `input` và `change`.** Gán thẳng `element.value = "..."` thì trang **không hề biết** giá trị đã đổi — nút Save vẫn xám, validation vẫn báo ô còn trống, framework vẫn giữ dữ liệu cũ:
+
+  ```javascript
+  arguments[0].value = arguments[1];
+  arguments[0].dispatchEvent(new Event('input',  {bubbles: true}));
+  arguments[0].dispatchEvent(new Event('change', {bubbles: true}));
+  ```
+
+- **`clickElementByJS` là phương án cuối, không phải mặc định.** Nó gọi thẳng vào sự kiện click của trang nên **bỏ qua mọi thứ đang che element** — tức là bỏ qua đúng cái lỗi giao diện mà người dùng thật sẽ gặp. Chỉ dùng khi `clickElement()` không được (thanh menu dính che nút, lớp phủ mờ đè lên).
+
+- **Chụp màn hình bằng trình duyệt, không bằng `Robot`.** `CaptureUtils` (Bài 12) dùng `Robot` nên chụp **toàn bộ màn hình máy tính** — chạy headless hoặc chạy trên máy CI không có màn hình là ra ảnh đen. `takeScreenshot()` dùng `TakesScreenshot` của Selenium nên chụp đúng nội dung trang, chạy được ở mọi chế độ. Ảnh lưu vào `exports/screenshots/` kèm timestamp trong tên file.
+
+  > Hàm này **cố ý không làm fail test** khi chụp hỏng, vì nó hay được gọi đúng lúc test đang fail — lỗi chụp mà ném ra ngoài sẽ che mất nguyên nhân fail thật.
+
+- **Upload file: gõ đường dẫn vào thẻ `input`, đừng mở hộp thoại của hệ điều hành.** `sendKeys(đường_dẫn)` vào `input[type=file]` không mở hộp thoại nào cả nên chạy được trên CI. Hai lưu ý:
+  - Locator phải trỏ đúng thẻ `input[type=file]`, không phải nút Browse được tô vẽ đè lên.
+  - Rất nhiều giao diện giấu thẻ `input` gốc bằng CSS → dùng `uploadFileToHiddenInput()` để gỡ CSS trước khi gõ.
+  - Hàm kiểm tra file có thật **trước** khi gõ, vì gõ đường dẫn sai thì trình duyệt im lặng bỏ qua, test chạy tiếp và fail ở tận bước assert sau.
+
+- **`waitForStalenessOf(element)` — cách chắc chắn để biết bảng đã vẽ lại.** Lấy `WebElement` của bảng cũ **trước** khi bấm lọc, bấm xong chờ nó bị gỡ khỏi trang, rồi mới đọc dữ liệu. Nếu chỉ chờ "bảng có chữ cần tìm" thì rất dễ đọc trúng bảng của lần vẽ trước.
+
+- **`closeCurrentTab()` phải nhảy về tab còn lại.** Sau khi `driver.close()` thì driver không còn trỏ vào cửa sổ nào, mọi lệnh tiếp theo báo `no such window`. Hàm cũng từ chối đóng khi chỉ còn 1 tab — đóng nốt là mất luôn phiên làm việc.
+
+- **`switchToWindowByTitle()` quay về cửa sổ ban đầu trước khi fail**, tránh để driver mắc kẹt ở cửa sổ cuối cùng làm sai hết các bước sau.
+
+- **`MobileUI` và `APIKeyword`** là hai class rỗng đặt sẵn chỗ, cho thấy hướng mở rộng của bộ keyword: cùng một cách tổ chức nhưng cho **Appium** (mobile) và **REST Assured** (API).
+
+---
+
 ## 🔗 Dữ liệu trung gian giữa các test case
 
-Từ Bài 22 & 23 (và Bài 24 dùng lại y nguyên), test data được truyền giữa các module qua file JSON trong `src/test/resources/testdata/` (đọc/ghi bằng `JsonUtils`):
+Từ Bài 22 & 23 (và Bài 24 & 25 dùng lại y nguyên), test data được truyền giữa các module qua file JSON trong `src/test/resources/testdata/` (đọc/ghi bằng `JsonUtils`):
 
 ```
 CustomersTest.testAddNewCustomer   →  customer_data.json  { "customerName": "..." }
@@ -737,7 +816,7 @@ JsonUtils.setDataToJsonFile(ConfigData.CUSTOMER_DATA_FILE, ConfigData.KEY_CUSTOM
 String customerName = JsonUtils.getValueFromJsonFile(ConfigData.CUSTOMER_DATA_FILE, ConfigData.KEY_CUSTOMER_NAME);
 ```
 
-> **Lưu ý thứ tự chạy:** `ProjectsTest` cần `customer_data.json` và `TasksTest` cần `project_data.json`. Chạy đúng thứ tự **Customers → Projects → Tasks** — suite `SuiteRegresionThucHanhPOM.xml` (Bài 22 & 23) và `SuiteRegresion.xml` (Bài 24) đều đã sắp sẵn thứ tự này. Nếu dữ liệu trong file JSON đã bị xóa khỏi CRM thì chạy lại test tạo mới tương ứng để làm mới dữ liệu.
+> **Lưu ý thứ tự chạy:** `ProjectsTest` cần `customer_data.json` và `TasksTest` cần `project_data.json`. Chạy đúng thứ tự **Customers → Projects → Tasks** — suite `SuiteRegresionThucHanhPOM.xml` (Bài 22 & 23) và `SuiteRegresion.xml` (Bài 24 & 25) đều đã sắp sẵn thứ tự này. Nếu dữ liệu trong file JSON đã bị xóa khỏi CRM thì chạy lại test tạo mới tương ứng để làm mới dữ liệu.
 
 ---
 
@@ -759,7 +838,7 @@ mvn test "-DsuiteXmlFile=src/test/resources/suites/SuiteRegresionThucHanhPOM.xml
 ```
 
 ```bash
-# Chạy toàn bộ Bài 24 theo đúng thứ tự phụ thuộc dữ liệu
+# Chạy toàn bộ Bài 24 & 25 theo đúng thứ tự phụ thuộc dữ liệu
 mvn test "-DsuiteXmlFile=src/test/resources/suites/SuiteRegresion.xml"
 ```
 
@@ -773,10 +852,10 @@ mvn test "-Dtest=CustomersTest"
 mvn test "-Dtest=ProjectsTest#testAddNewProject"
 ```
 
-> **Lưu ý:** từ Bài 24 trở đi có **2 class trùng tên** ở 2 package khác nhau (`Bai22_23_ThucHanhPOM` và `Bai24_VietHamChung_WebUI`). Muốn chạy đúng một class thì ghi đầy đủ package:
+> **Lưu ý:** từ Bài 24 trở đi có **2 class trùng tên** ở 2 package khác nhau (`Bai22_23_ThucHanhPOM` và `Bai24_25_VietHamChung_WebUI`). Muốn chạy đúng một class thì ghi đầy đủ package:
 >
 > ```bash
-> mvn test "-Dtest=com.anhtester.Bai24_VietHamChung_WebUI.testcases.ProjectsTest#testAddNewProject"
+> mvn test "-Dtest=com.anhtester.Bai24_25_VietHamChung_WebUI.testcases.ProjectsTest#testAddNewProject"
 > ```
 
 ```bash

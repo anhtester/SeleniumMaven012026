@@ -1,4 +1,4 @@
-package com.anhtester.Bai24_VietHamChung_WebUI.pages;
+package com.anhtester.Bai24_25_VietHamChung_WebUI.pages;
 
 import com.anhtester.constants.ConfigData;
 import com.anhtester.keywords.WebUI;
@@ -53,51 +53,49 @@ public class TasksPage extends BasePage {
    }
 
    public TasksPage openTasksPage() {
-      driver.get(ConfigData.BASE_URL + tasksPageUrl);
+      WebUI.openURL(ConfigData.BASE_URL + tasksPageUrl);
       WebUI.waitForPageLoaded();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(headerTasksSummary));
+      WebUI.waitForElementVisible(headerTasksSummary);
 
       return this;
    }
 
    public TasksPage verifyNavigateToTasksPage() {
       WebUI.waitForPageLoaded();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(headerTasksSummary));
-      wait.until(ExpectedConditions.urlContains(tasksPageUrl));
+      WebUI.waitForElementVisible(headerTasksSummary);
+      WebUI.waitForCurrentURLContains(tasksPageUrl);
 
       return this;
    }
 
    public TasksPage clickNewTaskButton() {
-      wait.until(ExpectedConditions.elementToBeClickable(buttonNewTask));
-      driver.findElement(buttonNewTask).click();
+      WebUI.clickElement(buttonNewTask);
       //Chờ modal chạy xong hiệu ứng fade để tránh click trượt khi modal còn di chuyển
-      wait.until(ExpectedConditions.visibilityOfElementLocated(modalTask));
-      wait.until(ExpectedConditions.elementToBeClickable(inputTaskName));
+      WebUI.waitForElementVisible(modalTask);
+      WebUI.waitForElementClickable(inputTaskName);
 
       return this;
    }
 
    public String getAddNewTaskModalTitle() {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(modalTaskTitle));
-      return driver.findElement(modalTaskTitle).getText().trim();
+      return WebUI.getElementText(modalTaskTitle).trim();
    }
 
    public TasksPage setTaskName(String taskName) {
-      setText(inputTaskName, taskName);
+      WebUI.setText(inputTaskName, taskName);
 
       return this;
    }
 
    public TasksPage setStartDate(String startDate) {
-      setText(inputStartDate, startDate);
+      WebUI.setText(inputStartDate, startDate);
       closeDatePicker();
 
       return this;
    }
 
    public TasksPage setDueDate(String dueDate) {
-      setText(inputDueDate, dueDate);
+      WebUI.setText(inputDueDate, dueDate);
       closeDatePicker();
 
       return this;
@@ -133,8 +131,7 @@ public class TasksPage extends BasePage {
    }
 
    public String getSelectedRelatedProject() {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(buttonRelatedItemDropdown));
-      return driver.findElement(buttonRelatedItemDropdown).getAttribute("title");
+      return WebUI.getElementAttribute(buttonRelatedItemDropdown, "title");
    }
 
    /**
@@ -143,14 +140,13 @@ public class TasksPage extends BasePage {
    public TasksPage clickSaveButton() {
       WebUI.clickElement(buttonSave);
       wait.until(ExpectedConditions.invisibilityOfElementLocated(modalTask));
-      wait.until(ExpectedConditions.visibilityOfElementLocated(modalTaskDetailTitle));
+      WebUI.waitForElementVisible(modalTaskDetailTitle);
 
       return this;
    }
 
    public String getTaskNameOnDetailModal() {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(modalTaskDetailTitle));
-      return driver.findElement(modalTaskDetailTitle).getText().trim();
+      return WebUI.getElementText(modalTaskDetailTitle).trim();
    }
 
    /**
@@ -159,8 +155,7 @@ public class TasksPage extends BasePage {
    public TasksPage closeTaskDetailModal() {
       //Toast thông báo lưu thành công nằm đè lên nút đóng ở góc phải trên, chờ nó tự tắt rồi mới bấm
       WebUI.retryUntil(driver -> driver.findElements(floatAlert).stream().noneMatch(WebElement::isDisplayed));
-      wait.until(ExpectedConditions.elementToBeClickable(buttonCloseTaskDetail));
-      driver.findElement(buttonCloseTaskDetail).click();
+      WebUI.clickElement(buttonCloseTaskDetail);
       wait.until(ExpectedConditions.invisibilityOfElementLocated(modalTaskDetail));
       WebUI.retryUntil(driver -> driver.findElements(modalBackdrop).stream().noneMatch(WebElement::isDisplayed));
       WebUI.waitForPageLoaded();
@@ -176,9 +171,7 @@ public class TasksPage extends BasePage {
     * Vì vậy phải chờ đủ 3 mốc: bảng đã lọc xong, lớp phủ Processing đã tắt, và hết ajax đang treo.
     */
    public TasksPage searchTask(String keyword) {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(inputSearchTask));
-      driver.findElement(inputSearchTask).clear();
-      driver.findElement(inputSearchTask).sendKeys(keyword);
+      WebUI.setText(inputSearchTask, keyword);
       if (!keyword.isEmpty()) {
          //Dùng WebUI.retryUntil vì getText() cũng có thể dính stale khi tbody đang được vẽ lại
          WebUI.retryUntil(driver -> {
@@ -220,24 +213,15 @@ public class TasksPage extends BasePage {
     * - KHÔNG chỉ bấm ra vùng trống vì focus vẫn nằm ở ô ngày, lát sau lịch tự bung lại.
     */
    private void closeDatePicker() {
-      wait.until(ExpectedConditions.elementToBeClickable(inputTaskName));
-      driver.findElement(inputTaskName).click();
+      WebUI.clickElement(inputTaskName);
       WebUI.retryUntil(driver -> driver.findElements(datePickerPopup).stream().noneMatch(WebElement::isDisplayed));
    }
 
-   private void setText(By locator, String value) {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-      driver.findElement(locator).clear();
-      driver.findElement(locator).sendKeys(value);
-   }
-
    private void selectPickerByText(By buttonDropdown, String selectId, String visibleText) {
-      wait.until(ExpectedConditions.elementToBeClickable(buttonDropdown));
-      driver.findElement(buttonDropdown).click();
+      WebUI.clickElement(buttonDropdown);
 
       By option = getSelectPickerOption(selectId, visibleText);
-      wait.until(ExpectedConditions.elementToBeClickable(option));
-      driver.findElement(option).click();
+      WebUI.clickElement(option);
 
       wait.until(ExpectedConditions.attributeToBe(buttonDropdown, "title", visibleText));
    }

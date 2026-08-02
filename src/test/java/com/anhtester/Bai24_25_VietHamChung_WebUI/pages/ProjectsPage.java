@@ -1,4 +1,4 @@
-package com.anhtester.Bai24_VietHamChung_WebUI.pages;
+package com.anhtester.Bai24_25_VietHamChung_WebUI.pages;
 
 import com.anhtester.constants.ConfigData;
 import com.anhtester.keywords.WebUI;
@@ -6,7 +6,6 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.Assert;
 
 import java.time.Duration;
 
@@ -65,24 +64,23 @@ public class ProjectsPage extends BasePage {
    }
 
    public ProjectsPage openProjectsPage() {
-      driver.get(ConfigData.BASE_URL + projectsPageUrl);
+      WebUI.openURL(ConfigData.BASE_URL + projectsPageUrl);
       WebUI.waitForPageLoaded();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(headerProjectsPage));
+      WebUI.waitForElementVisible(headerProjectsPage);
 
       return this;
    }
 
    public ProjectsPage verifyNavigateToProjectsPage() {
-      wait.until(ExpectedConditions.visibilityOf(driver.findElement(headerProjectsPage)));
-      Assert.assertEquals(driver.findElement(headerProjectsPage).getText(), "Projects Summary", "The header Projects page not match.");
-      Assert.assertEquals(driver.getCurrentUrl(), ConfigData.BASE_URL + projectsPageUrl, "The Projects page URL is incorrect.");
+      WebUI.waitForElementVisible(headerProjectsPage);
+      WebUI.assertEquals(WebUI.getElementText(headerProjectsPage), "Projects Summary", "The header Projects page not match.");
+      WebUI.assertEquals(WebUI.getCurrentURL(), ConfigData.BASE_URL + projectsPageUrl, "The Projects page URL is incorrect.");
 
       return this;
    }
 
    public ProjectsPage clickNewProjectButton() {
-      wait.until(ExpectedConditions.elementToBeClickable(buttonNewProject));
-      driver.findElement(buttonNewProject).click();
+      WebUI.clickElement(buttonNewProject);
       waitForAddNewProjectFormLoaded();
 
       return this;
@@ -90,20 +88,20 @@ public class ProjectsPage extends BasePage {
 
    public ProjectsPage verifyNavigateToAddNewProjectPage() {
       waitForAddNewProjectFormLoaded();
-      wait.until(ExpectedConditions.urlContains(addNewProjectPageUrl));
+      WebUI.waitForCurrentURLContains(addNewProjectPageUrl);
 
       return this;
    }
 
    private void waitForAddNewProjectFormLoaded() {
       WebUI.waitForPageLoaded();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(inputProjectName));
+      WebUI.waitForElementVisible(inputProjectName);
       //Chờ TinyMCE khởi tạo xong, tránh việc editor cướp focus làm đóng dropdown đang mở
-      wait.until(ExpectedConditions.visibilityOfElementLocated(iframeDescriptionEditor));
+      WebUI.waitForElementVisible(iframeDescriptionEditor);
    }
 
    public ProjectsPage setProjectName(String projectName) {
-      setText(inputProjectName, projectName);
+      WebUI.setText(inputProjectName, projectName);
 
       return this;
    }
@@ -140,25 +138,25 @@ public class ProjectsPage extends BasePage {
 
    //Ô Project Cost chỉ hiển thị khi Billing Type là Fixed Rate
    public ProjectsPage setProjectCost(String projectCost) {
-      setText(inputProjectCost, projectCost);
+      WebUI.setText(inputProjectCost, projectCost);
 
       return this;
    }
 
    public ProjectsPage setEstimatedHours(String estimatedHours) {
-      setText(inputEstimatedHours, estimatedHours);
+      WebUI.setText(inputEstimatedHours, estimatedHours);
 
       return this;
    }
 
    public ProjectsPage setStartDate(String startDate) {
-      setText(inputStartDate, startDate);
+      WebUI.setText(inputStartDate, startDate);
 
       return this;
    }
 
    public ProjectsPage setDeadline(String deadline) {
-      setText(inputDeadline, deadline);
+      WebUI.setText(inputDeadline, deadline);
 
       return this;
    }
@@ -172,7 +170,7 @@ public class ProjectsPage extends BasePage {
    public ProjectsPage waitForProjectViewPage() {
       WebUI.waitForPageLoaded();
       wait.until(ExpectedConditions.urlMatches(".*/admin/projects/view/\\d+$"));
-      wait.until(ExpectedConditions.visibilityOfElementLocated(overviewCustomer));
+      WebUI.waitForElementVisible(overviewCustomer);
 
       return this;
    }
@@ -185,9 +183,7 @@ public class ProjectsPage extends BasePage {
     * Vì vậy phải chờ đủ 3 mốc: bảng đã lọc xong, lớp phủ Processing đã tắt, và hết ajax đang treo.
     */
    public ProjectsPage searchProject(String keyword) {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(inputSearchProject));
-      driver.findElement(inputSearchProject).clear();
-      driver.findElement(inputSearchProject).sendKeys(keyword);
+      WebUI.setText(inputSearchProject, keyword);
       if (!keyword.isEmpty()) {
          //Dùng WebUI.retryUntil vì getText() cũng có thể dính stale khi tbody đang được vẽ lại
          WebUI.retryUntil(driver -> {
@@ -249,7 +245,7 @@ public class ProjectsPage extends BasePage {
 
       //Sau khi xóa, trang Projects được load lại từ đầu
       WebUI.waitForPageLoaded();
-      wait.until(ExpectedConditions.visibilityOfElementLocated(headerProjectsPage));
+      WebUI.waitForElementVisible(headerProjectsPage);
 
       return this;
    }
@@ -267,84 +263,56 @@ public class ProjectsPage extends BasePage {
    }
 
    public String getProjectNameOnViewPage() {
-      //Thẻ h3.project-name có class 'hide' nên phải lấy textContent thay vì getText()
-      wait.until(ExpectedConditions.presenceOfElementLocated(headerProjectName));
-      return driver.findElement(headerProjectName).getAttribute("textContent").trim();
+      //Thẻ h3.project-name có class 'hide' nên chỉ chờ present và lấy textContent thay vì getText()
+      WebUI.waitForElementPresent(headerProjectName);
+      return WebUI.getWebElement(headerProjectName).getAttribute("textContent").trim();
    }
 
    public String getProjectIdOnViewPage() {
-      return getElementText(overviewProjectId);
+      return WebUI.getElementText(overviewProjectId).trim();
    }
 
    public String getCustomerNameOnViewPage() {
-      return getElementText(overviewCustomer);
+      return WebUI.getElementText(overviewCustomer).trim();
    }
 
    public String getBillingTypeOnViewPage() {
-      return getElementText(overviewBillingType);
+      return WebUI.getElementText(overviewBillingType).trim();
    }
 
    public String getStatusOnViewPage() {
-      return getElementText(overviewStatus);
+      return WebUI.getElementText(overviewStatus).trim();
    }
 
    public String getStartDateOnViewPage() {
-      return getElementText(overviewStartDate);
+      return WebUI.getElementText(overviewStartDate).trim();
    }
 
    public int getNotStartedTotal() {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(totalNotStarted));
-      int notStartedTotal = Integer.parseInt(driver.findElement(totalNotStarted).getText());
-      System.out.println("Total not started: " + notStartedTotal);
-      return notStartedTotal;
+      return Integer.parseInt(WebUI.getElementText(totalNotStarted).trim());
    }
 
    public int getInProgressTotal() {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(totalInProgress));
-      int inProgressTotal = Integer.parseInt(driver.findElement(totalInProgress).getText());
-      System.out.println("Total in progress: " + inProgressTotal);
-      return inProgressTotal;
+      return Integer.parseInt(WebUI.getElementText(totalInProgress).trim());
    }
 
    public int getOnHoldTotal() {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(totalOnHold));
-      int onHoldTotal = Integer.parseInt(driver.findElement(totalOnHold).getText());
-      System.out.println("Total on hold: " + onHoldTotal);
-      return onHoldTotal;
+      return Integer.parseInt(WebUI.getElementText(totalOnHold).trim());
    }
 
    public int getCancelledTotal() {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(totalCancelled));
-      int cancelledTotal = Integer.parseInt(driver.findElement(totalCancelled).getText());
-      System.out.println("Total cancelled: " + cancelledTotal);
-      return cancelledTotal;
+      return Integer.parseInt(WebUI.getElementText(totalCancelled).trim());
    }
 
    public int getFinishedTotal() {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(totalFinished));
-      int finishedTotal = Integer.parseInt(driver.findElement(totalFinished).getText());
-      System.out.println("Total finished: " + finishedTotal);
-      return finishedTotal;
-   }
-
-   private void setText(By locator, String value) {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-      driver.findElement(locator).clear();
-      driver.findElement(locator).sendKeys(value);
-   }
-
-   private String getElementText(By locator) {
-      wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-      return driver.findElement(locator).getText().trim();
+      return Integer.parseInt(WebUI.getElementText(totalFinished).trim());
    }
 
    private void selectPickerByText(By buttonDropdown, String selectId, String visibleText) {
-      wait.until(ExpectedConditions.elementToBeClickable(buttonDropdown));
-      driver.findElement(buttonDropdown).click();
+      WebUI.clickElement(buttonDropdown);
 
       By option = getSelectPickerOption(selectId, visibleText);
-      wait.until(ExpectedConditions.elementToBeClickable(option));
-      driver.findElement(option).click();
+      WebUI.clickElement(option);
 
       wait.until(ExpectedConditions.attributeToBe(buttonDropdown, "title", visibleText));
    }

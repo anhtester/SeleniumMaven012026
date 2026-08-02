@@ -1,16 +1,11 @@
-package com.anhtester.Bai24_VietHamChung_WebUI.pages;
+package com.anhtester.Bai24_25_VietHamChung_WebUI.pages;
 
 import com.anhtester.keywords.WebUI;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.time.Duration;
 
 public class BasePage {
    private WebDriver driver;
-   private WebDriverWait wait;
 
    By menuDashboard = By.xpath("//span[normalize-space()='Dashboard']");
    By menuCustomers = By.xpath("//span[normalize-space()='Customers']");
@@ -19,35 +14,30 @@ public class BasePage {
 
    public BasePage(WebDriver driver) {
       this.driver = driver;
-      wait = new WebDriverWait(driver, Duration.ofSeconds(10));
       //Truyền driver vào class WebUI để các hàm static của WebUI dùng chung driver này
       new WebUI(driver);
    }
 
-   public DashboardPage clickDashboardMenu(){
-      wait.until(ExpectedConditions.elementToBeClickable(menuDashboard));
-      driver.findElement(menuDashboard).click();
+   public DashboardPage clickDashboardMenu() {
+      WebUI.clickElement(menuDashboard);
 
       return new DashboardPage(driver);
    }
 
-   public CustomersPage clickCustomersMenu(){
-      wait.until(ExpectedConditions.elementToBeClickable(menuCustomers));
-      driver.findElement(menuCustomers).click();
+   public CustomersPage clickCustomersMenu() {
+      WebUI.clickElement(menuCustomers);
 
       return new CustomersPage(driver);
    }
 
-   public ProjectsPage clickProjectsMenu(){
-      wait.until(ExpectedConditions.elementToBeClickable(menuProjects));
-      driver.findElement(menuProjects).click();
+   public ProjectsPage clickProjectsMenu() {
+      WebUI.clickElement(menuProjects);
 
       return new ProjectsPage(driver);
    }
 
-   public TasksPage clickTasksMenu(){
-      wait.until(ExpectedConditions.elementToBeClickable(menuTasks));
-      driver.findElement(menuTasks).click();
+   public TasksPage clickTasksMenu() {
+      WebUI.clickElement(menuTasks);
 
       return new TasksPage(driver);
    }

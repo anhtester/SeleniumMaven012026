@@ -1,8 +1,8 @@
-package com.anhtester.Bai24_VietHamChung_WebUI.testcases;
+package com.anhtester.Bai24_25_VietHamChung_WebUI.testcases;
 
-import com.anhtester.Bai24_VietHamChung_WebUI.pages.CustomersPage;
-import com.anhtester.Bai24_VietHamChung_WebUI.pages.DashboardPage;
-import com.anhtester.Bai24_VietHamChung_WebUI.pages.LoginPage;
+import com.anhtester.Bai24_25_VietHamChung_WebUI.pages.CustomersPage;
+import com.anhtester.Bai24_25_VietHamChung_WebUI.pages.DashboardPage;
+import com.anhtester.Bai24_25_VietHamChung_WebUI.pages.LoginPage;
 import com.anhtester.common.BaseTest;
 import com.anhtester.constants.ConfigData;
 import com.anhtester.utils.JsonUtils;
